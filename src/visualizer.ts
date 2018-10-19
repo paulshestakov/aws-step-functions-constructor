@@ -1,7 +1,6 @@
-// import * as viz from "viz.js";
-
-const Viz = require("viz.js");
-const { Module, render } = require("viz.js/full.render.js");
+import * as Viz from "viz.js";
+import { Module, render } from "viz.js/full.render.js";
+import logger from "./logger";
 
 let viz = new Viz({ Module, render });
 
@@ -13,20 +12,13 @@ export default function visualize({ startStep, steps }: any, done: Function) {
     }
     `;
 
-  //   viz.renderImageElement("digraph { a -> b }").then(function(element) {
-  //     document.body.appendChild(element);
-  //   });
-
-  console.log(str);
-
   viz
     .renderString(str)
     .then(function(element: any) {
-      console.log(element);
       done(null, element);
     })
     .catch((err: any) => {
-      console.log(err);
+      logger.log(err);
     });
 }
 
@@ -61,8 +53,6 @@ function buildTransitions(steps: any[]) {
                 color=lightgrey;
                 node [style=filled,color=white];
                 ${group.join("")}
-
-
             }
         `;
       subTansitions.push(subGraph);

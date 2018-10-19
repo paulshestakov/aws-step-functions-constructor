@@ -16,8 +16,6 @@ function parseYaml(rawText: string, done: Function) {
   try {
     var doc = yaml.safeLoad(rawText);
 
-    console.log(42);
-
     const flowName = Object.keys(doc)[0];
 
     const flowDefinition = doc[flowName].definition;
@@ -29,8 +27,6 @@ function parseYaml(rawText: string, done: Function) {
         stepDescription: flowDefinition.States[stepName]
       };
     });
-
-    console.log(steps);
 
     done(null, {
       startStep,
