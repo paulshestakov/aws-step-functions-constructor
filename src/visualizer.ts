@@ -1,5 +1,5 @@
-import * as Viz from "viz.js";
-import { Module, render } from "viz.js/full.render.js";
+const Viz = require("viz.js"); // tslint:disable-line
+const { Module, render } = require("viz.js/full.render.js"); // tslint:disable-line
 import logger from "./logger";
 
 let viz = new Viz({ Module, render });
