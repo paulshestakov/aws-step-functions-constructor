@@ -9,7 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       const activeFilePath = vscode.window.activeTextEditor!.document.uri
         .fsPath;
-      const fileName = activeFilePath.split("/").reverse()[0];
+
+      const fileName = activeFilePath.split(/\/|\\/).reverse()[0];
 
       const panel = vscode.window.createWebviewPanel(
         fileName,
