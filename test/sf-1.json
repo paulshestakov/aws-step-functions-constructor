@@ -1,0 +1,64 @@
+{
+  "SFName": {
+    "Comment": "An example that adds two numbers together.",
+    "StartAt": "ChoiceStateX",
+    "Version": "1.0",
+    "TimeoutSeconds": 10,
+    "States": {
+      "ChoiceStateX": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Not": {
+              "Variable": "$.type",
+              "StringEquals": "Private"
+            },
+            "Next": "Public"
+          },
+          {
+            "Variable": "$.value",
+            "NumericEquals": 0,
+            "Next": "ValueIsZero"
+          },
+          {
+            "And": [
+              {
+                "Variable": "$.value",
+                "NumericGreaterThanEquals": 20
+              },
+              {
+                "Variable": "$.value",
+                "NumericLessThan": 30
+              }
+            ],
+            "Next": "ValueInTwenties"
+          }
+        ],
+        "Default": "DefaultState"
+      },
+
+      "Public": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:Foo",
+        "Next": "NextState"
+      },
+
+      "ValueIsZero": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:Zero",
+        "Next": "NextState"
+      },
+
+      "ValueInTwenties": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:123456789012:function:Bar",
+        "Next": "NextState"
+      },
+
+      "DefaultState": {
+        "Type": "Fail",
+        "Cause": "No Matches!"
+      }
+    }
+  }
+}

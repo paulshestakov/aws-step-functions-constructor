@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import parse from "./parser";
 import visualize from "./visualizer";
 import logger from "./logger";
+import {getFileFormat} from './parse/file'
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
@@ -19,6 +20,10 @@ export function activate(context: vscode.ExtensionContext) {
         {}
       );
       panel.webview.html = getLoadingView();
+
+
+      const fileFormat = getFileFormat(activeFilePath)
+
 
       parse(activeFilePath, (error: any, result: any) => {
         if (error) {

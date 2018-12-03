@@ -1,0 +1,90 @@
+Test:
+  name: role
+  role: arn
+
+  alarms:
+    - name: name
+      description: description
+
+  definition:
+    Comment: "Comment"
+    StartAt: One
+    States:
+      One:
+        Type: Task
+        InputPath: "$.a"
+        ResultPath: "$.b"
+        OutputPath: "$"
+        Resource: resourceArn
+        Retry:
+          - ErrorEquals: [ "States.ALL" ]
+            IntervalSeconds: 120
+            BackoffRate: 2.0
+            MaxAttempts: 5
+        Catch:
+          - ErrorEquals:
+              - States.ALL
+            Next: CatchAllFallback
+        Next: Two
+      Two:
+        Type: Choice
+        Choices:
+        - Variable: "$.a"
+          StringEquals: "single"
+          Next: TwoOne
+        - Variable: "$.a"
+          StringEquals: "multiple"
+          Next: TwoTwo
+        Default: CatchAllFallback
+      TwoOne:
+        Type: Task
+        InputPath: "$.a"
+        ResultPath: "$.b"
+        OutputPath: "$"
+        Resource: resourceArn
+        Retry:
+          - ErrorEquals: [ "States.ALL" ]
+            IntervalSeconds: 120
+            BackoffRate: 2.0
+            MaxAttempts: 5
+        Catch:
+          - ErrorEquals:
+              - States.ALL
+            Next: CatchAllFallback
+        Next: Three
+      TwoTwo:
+        Type: Task
+        InputPath: "$.a"
+        ResultPath: "$.b"
+        OutputPath: "$"
+        Resource: resourceArn
+        Retry:
+          - ErrorEquals: [ "States.ALL" ]
+            IntervalSeconds: 120
+            BackoffRate: 2.0
+            MaxAttempts: 5
+        Catch:
+          - ErrorEquals:
+              - States.ALL
+            Next: CatchAllFallback
+        Next: Three
+      Three:
+        Type: Task
+        InputPath: "$.searchInfo"
+        ResultPath: "$.matchInfo"
+        OutputPath: "$"
+        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:mdlwr-uk-flows-matchAndValidation-${self:provider.stage}-searchInMdm
+        Retry:
+          - ErrorEquals: [ "States.ALL" ]
+            IntervalSeconds: 120
+            BackoffRate: 2.0
+            MaxAttempts: 5
+        Catch:
+          - ErrorEquals:
+              - States.ALL
+            Next: CatchAllFallback
+        End: true
+      CatchAllFallback:
+        Type: Fail
+        Error: Error
+        Cause: This is a fallback from any error code
