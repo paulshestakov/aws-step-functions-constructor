@@ -1,26 +1,7 @@
-const Viz = require("viz.js"); // tslint:disable-line
-const { Module, render } = require("viz.js/full.render.js"); // tslint:disable-line
-import logger from "./logger";
+const Viz = require("viz.js");
+const { Module, render } = require("viz.js/full.render.js");
 
 let viz = new Viz({ Module, render });
-
-export default function visualize({ startStep, steps }: any, done: Function) {
-  const str = `
-    digraph {
-        ${buildTransitions(steps)}
-        ${startStep} [shape=Mdiamond];
-    }
-    `;
-
-  viz
-    .renderString(str)
-    .then(function(element: any) {
-      done(null, element);
-    })
-    .catch((err: any) => {
-      logger.log(err);
-    });
-}
 
 function buildTransitions(steps: any[]) {
   const transitions: any[] = [];
@@ -62,4 +43,15 @@ function buildTransitions(steps: any[]) {
   });
 
   return transitions.join("");
+}
+
+export default async function visualize({ startStep, steps }: any) {
+  const str = `
+    digraph {
+        ${buildTransitions(steps)}
+        ${startStep} [shape=Mdiamond];
+    }
+    `;
+
+  return await viz.renderString(str);
 }
