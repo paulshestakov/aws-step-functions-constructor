@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import parse from "./parse";
+import parse from "./parsing/parse";
 import visualize from "./visualize";
 import logger from "./logger";
 import { wrapInHtml, getLoadingView } from "./render";
@@ -21,15 +21,23 @@ export function activate(context: vscode.ExtensionContext) {
       );
       panel.webview.html = getLoadingView();
 
+      console.log(vscode.window);
+
       try {
         const result = await parse(activeFilePath);
 
         const { startStep, steps } = result;
 
+        console.log(startStep);
+        console.log(steps);
+
         const renderingResult = await visualize({ startStep, steps });
+
+        console.log(renderingResult);
 
         panel.webview.html = wrapInHtml(renderingResult);
       } catch (error) {
+        console.log(error);
         logger.log(error);
       }
     }
@@ -38,5 +46,4 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}

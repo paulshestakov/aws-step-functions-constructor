@@ -6,30 +6,30 @@ let viz = new Viz({ Module, render });
 function buildTransitions(steps: any[]) {
   const transitions: any[] = [];
 
-  steps.forEach(({ stepName, stepDescription }) => {
+  steps.forEach(({ stepName, stepDescription }, index) => {
     const subTansitions: any[] = [];
 
     if (stepDescription.Next) {
-      subTansitions.push(`${stepName}->${stepDescription.Next};`);
+      subTansitions.push(`"${stepName}" -> "${stepDescription.Next}";`);
     }
 
     if (stepDescription.Catch) {
       stepDescription.Catch.forEach((item: any) => {
-        subTansitions.push(`${stepName}->${item.Next};`);
+        subTansitions.push(`"${stepName}" -> "${item.Next}";`);
       });
     }
 
     if (stepDescription.Choices) {
       stepDescription.Choices.forEach((choice: any) => {
-        subTansitions.push(`${stepName}->${choice.Next};`);
+        subTansitions.push(`"${stepName}" -> "${choice.Next}";`);
       });
 
       const group = stepDescription.Choices.map((choice: any) => {
-        return `${choice.Next};`;
+        return `"${choice.Next}"; `;
       });
 
       const subGraph = `
-            subgraph cluster_${stepName + "_Choices"} {
+            subgraph cluster_${index + "_Choices"} {
                 style=filled;
                 color=lightgrey;
                 node [style=filled,color=white];
@@ -49,9 +49,10 @@ export default async function visualize({ startStep, steps }: any) {
   const str = `
     digraph {
         ${buildTransitions(steps)}
-        ${startStep} [shape=Mdiamond];
+        "${startStep}" [shape=Mdiamond];
     }
     `;
+  console.log(str);
 
   return await viz.renderString(str);
 }

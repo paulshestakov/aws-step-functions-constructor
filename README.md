@@ -1,3 +1,4 @@
-# aws-step-functions-constructor README
+# Synopsis
+Extension to visualize aws step functions
 
-Magic extension to be used to visualize aws state functions state machine
+![alt text](https://github.com/PaulShestakov/pics/blob/master/sf.png?raw=true)
