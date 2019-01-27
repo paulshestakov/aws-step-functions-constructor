@@ -3,8 +3,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 enum FileFormat {
-  JSON = "JSON",
-  YML = "YML"
+  JSON,
+  YML
 }
 
 function getFileFormat(filePath: string): FileFormat {
@@ -21,11 +21,11 @@ function getFileFormat(filePath: string): FileFormat {
   }
 }
 
-async function readFile(filePath: string): Promise<string> {
+async function readFile(filePath: string): Promise<any> {
   return new Promise((resolve, reject) => {
     fs.readFile(filePath, "utf8", (error, data: string) => {
       if (error) {
-        reject(error);
+        reject(JSON.stringify(error));
       } else {
         resolve(data);
       }
