@@ -6,7 +6,7 @@ import { wrapInHtml, getLoadingView } from "./render";
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
-    "extension.displaySF",
+    "extension.showStepFunction",
     async () => {
       const activeFilePath = vscode.window.activeTextEditor!.document.uri
         .fsPath;

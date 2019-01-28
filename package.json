@@ -2,7 +2,7 @@
   "name": "aws-step-functions-constructor",
   "displayName": "aws-step-functions-constructor",
   "description": "",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "paulshestakov",
   "repository": {
     "type": "git",
@@ -15,14 +15,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.displaySF"
+    "onCommand:extension.showStepFunction"
   ],
   "main": "./out/extension",
   "contributes": {
     "commands": [
       {
-        "command": "extension.displaySF",
-        "title": "displaySF"
+        "command": "extension.showStepFunction",
+        "title": "Show step function"
       }
     ]
   },
