@@ -80,26 +80,10 @@ function getDefinition(document: any): Definition {
   throw new Error("Could not extract function definition");
 }
 
-function transformDefinition(definition: Definition) {
-  const startStep = definition.StartAt;
-  const steps = Object.keys(definition.States).map(stepName => {
-    return {
-      stepName,
-      stepDescription: definition.States[stepName]
-    };
-  });
-
-  return {
-    startStep,
-    steps
-  };
-}
-
 export default async function parse(filePath: string) {
   const fileFormat = getFileFormat(filePath);
   const rawData = await readFile(filePath);
   const parsedData = parseFileStructure(fileFormat, rawData);
   const definition = getDefinition(parsedData);
-  const mappedDefinition = transformDefinition(definition);
-  return mappedDefinition;
+  return definition;
 }

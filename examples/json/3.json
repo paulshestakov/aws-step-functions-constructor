@@ -9,7 +9,19 @@
           "StartAt": "B",
           "States": {
             "B": {
-              "Type": "Fail"
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Next": "E"
+                }
+              ],
+              "Default": "F"
+            },
+            "E": {
+              "Type": "Task"
+            },
+            "F": {
+              "Type": "Task"
             }
           }
         },
@@ -22,16 +34,11 @@
             }
           }
         }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "D"
-        }
       ]
     },
     "D": {
-      "Type": "Fail"
+      "Type": "Task",
+      "End": true
     }
   }
 }

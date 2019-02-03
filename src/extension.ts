@@ -24,14 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
       console.log(vscode.window);
 
       try {
-        const result = await parse(activeFilePath);
-
-        const { startStep, steps } = result;
-
-        console.log(startStep);
-        console.log(steps);
-
-        const renderingResult = await visualize({ startStep, steps });
+        const stepFunction = await parse(activeFilePath);
+        const renderingResult = await visualize(stepFunction);
 
         console.log(renderingResult);
 

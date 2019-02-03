@@ -1,0 +1,169 @@
+service: lametric-step
+
+plugins:
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: us-east-2
+
+functions:
+  request:
+    handler: handler.request
+
+stepFunctions:
+  stateMachines:
+    stepFunction:
+      events:
+        - http:
+            path: update
+            method: POST
+      name: lametric-step
+      definition:
+        Comment: "Comment"
+        StartAt: StartState
+        States:
+          StartState:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: SingleMatchFound
+          SingleMatchFound:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                StringEquals: "hmmm"
+                Next: CreateMe
+              - Variable: "$.var"
+                StringEquals: "hmmm"
+                Next: WhoAmI
+              - Variable: "$.var"
+                StringEquals: "hmmm"
+                Next: WhoAmI
+            Default: CatchAllFallback
+          WhoAmI:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                BooleanEquals: false
+                Next: SearchForGold
+              - Variable: "$.var"
+                BooleanEquals: true
+                Next: SearchFate
+            Default: CatchAllFallback
+          SearchFate:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: DoesItMakeSence
+          DoesItMakeSence:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                BooleanEquals: false
+                Next: WaitForRain
+              - Variable: "$.var"
+                BooleanEquals: true
+                Next: CreateMe
+            Default: CatchAllFallback
+          WaitForRain:
+            Type: Wait
+            Seconds: 50000
+            Next: SearchFate
+          SearchForGold:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: IsItGoodEnough
+          IsItGoodEnough:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                NumericEquals: 1
+                Next: SearchFate
+              - Variable: "$.var"
+                NumericGreaterThanEquals: 1
+                Next: WowTask
+              - Variable: "$.var"
+                NumericLessThan: 1
+                Next: WowTask
+            Default: CatchAllFallback
+          WowTask:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: WaitForIt
+          WaitForIt:
+            Type: Wait
+            Seconds: 100
+            Next: SayGoodbye
+          SayGoodbye:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: CheckVoiceStatus
+          CheckVoiceStatus:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                BooleanEquals: false
+                Next: WaitForIt
+              - Variable: "$.var"
+                BooleanEquals: true
+                Next: CheckParrot
+            Default: CatchAllFallback
+          CheckParrot:
+            Type: Choice
+            Choices:
+              - Variable: "$.var"
+                StringEquals: "hmmm"
+                Next: SearchFate
+              - Variable: "$.var"
+                StringEquals: "hmmm"
+                Next: SetMagic
+            Default: CatchAllFallback
+          SetMagic:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            End: true
+          CreateRobot:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: Evaluate
+          Evaluate:
+            Type: Task
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            Next: Update
+          Update:
+            Type: Task
+            OutputPath: "$"
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: CatchAllFallback
+            End: true
+          CatchAllFallback:
+            Type: Fail
+            Error: Error
+            Cause: That is a cause comment
