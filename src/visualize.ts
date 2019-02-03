@@ -79,24 +79,6 @@ function buildTransitions(stepFunction: StepFunction): SubgraphData {
   };
 }
 
-function getAllStatesNames(stepFunction: StepFunction): string[] {
-  const allStatesNames: string[] = [];
-
-  Object.keys(stepFunction.States).map(stateName => {
-    const state = stepFunction.States[stateName];
-
-    allStatesNames.push(stateName);
-
-    if (state.Type === "Parallel") {
-      state.Branches.forEach(branch => {
-        allStatesNames.push(...getAllStatesNames(branch));
-      });
-    }
-  });
-
-  return allStatesNames;
-}
-
 function getEndStateName(stepFunction: StepFunction) {
   return Object.keys(stepFunction.States).find(stateName => {
     const state = stepFunction.States[stateName];
