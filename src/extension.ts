@@ -2,7 +2,35 @@ import * as vscode from "vscode";
 import parse from "./parsing/parse";
 import visualize from "./visualize";
 import logger from "./logger";
-import { wrapInHtml, getLoadingView } from "./render";
+import * as path from "path";
+
+function debounce(func: Function, wait: number) {
+  let id: any;
+
+  return function() {
+    const args = arguments;
+    const later = function() {
+      id = null;
+      func.apply(null, args);
+    };
+
+    clearTimeout(id);
+    id = setTimeout(later, wait);
+  };
+}
+
+async function updateContent(activeFilePath: string, panel) {
+  console.log("VSCE updateContent");
+  const stepFunction = await parse(activeFilePath);
+  const renderingResult = await visualize(stepFunction);
+
+  panel.webview.postMessage({
+    command: "UPDATE",
+    data: renderingResult
+  });
+}
+
+const updateContentDebounced: any = debounce(updateContent, 300);
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
@@ -13,27 +41,54 @@ export function activate(context: vscode.ExtensionContext) {
 
       const fileName = activeFilePath.split(/\/|\\/).reverse()[0];
 
+      const resourceColumn =
+        (vscode.window.activeTextEditor &&
+          vscode.window.activeTextEditor.viewColumn) ||
+        vscode.ViewColumn.One;
+
       const panel = vscode.window.createWebviewPanel(
         fileName,
         fileName,
-        vscode.ViewColumn.One,
-        {}
+        resourceColumn + 1,
+        {
+          enableScripts: true,
+          localResourceRoots: [
+            vscode.Uri.file(path.join(context.extensionPath, "media"))
+          ]
+        }
       );
-      panel.webview.html = getLoadingView();
-
-      console.log(vscode.window);
 
       try {
         const stepFunction = await parse(activeFilePath);
         const renderingResult = await visualize(stepFunction);
 
-        console.log(renderingResult);
+        // console.log(renderingResult);
 
-        panel.webview.html = wrapInHtml(renderingResult);
+        panel.webview.html = _getHtmlForWebview(
+          context.extensionPath,
+          renderingResult
+        );
       } catch (error) {
         console.log(error);
         logger.log(error);
       }
+
+      vscode.workspace.onDidChangeTextDocument(async event => {
+        if (event.document.uri.fsPath === activeFilePath) {
+          console.log(JSON.stringify(event));
+          updateContentDebounced(activeFilePath, panel);
+        }
+      }, null);
+
+      panel.webview.onDidReceiveMessage(message => {
+        switch (message.command) {
+          case "alert":
+            vscode.window.showErrorMessage(message.text);
+            return;
+        }
+      }, null);
+
+      panel.webview.postMessage({ command: "refactor" });
     }
   );
 
@@ -41,3 +96,45 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function _getHtmlForWebview(extensionPath: string, content: string) {
+  const scriptPathOnDisk = vscode.Uri.file(
+    path.join(extensionPath, "media", "main.js")
+  );
+  const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
+  const nonce = getNonce();
+
+  return `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}';">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <style>
+        html, body, #content {
+          width: 100vh;
+          height: 100vw;
+          max-width: 100vw;
+          max-height: 100vh;
+          background-color: white !important;
+        }
+      </style>
+      <body>
+
+          <script nonce="${nonce}" src="${scriptUri}"></script>
+
+          <div id="content">${content}</div>
+      </body>
+      </html>`;
+}
+
+function getNonce() {
+  let text = "";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}

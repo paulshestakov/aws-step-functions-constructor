@@ -180,7 +180,7 @@ export default async function visualize(stepFunction: StepFunction) {
     }
     `;
 
-  console.log(str);
+  // console.log(str);
 
   return await viz.renderString(str);
 }
