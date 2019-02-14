@@ -21,8 +21,14 @@ function debounce(func: Function, wait: number) {
 
 async function updateContent(activeFilePath: string, panel) {
   console.log("VSCE updateContent");
-  const stepFunction = await parse(activeFilePath);
-  const renderingResult = await visualize(stepFunction);
+  let renderingResult;
+
+  try {
+    const stepFunction = await parse(activeFilePath);
+    renderingResult = await visualize(stepFunction);
+  } catch (error) {
+    renderingResult = renderError(error);
+  }
 
   panel.webview.postMessage({
     command: "UPDATE",
@@ -62,8 +68,6 @@ export function activate(context: vscode.ExtensionContext) {
         const stepFunction = await parse(activeFilePath);
         const renderingResult = await visualize(stepFunction);
 
-        // console.log(renderingResult);
-
         panel.webview.html = _getHtmlForWebview(
           context.extensionPath,
           renderingResult
@@ -74,8 +78,11 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       vscode.workspace.onDidChangeTextDocument(async event => {
-        if (event.document.uri.fsPath === activeFilePath) {
-          console.log(JSON.stringify(event));
+        const isActiveDocumentEdit =
+          event.document.uri.fsPath === activeFilePath;
+        const hasSomethingChanged = event.contentChanges.length > 0;
+
+        if (isActiveDocumentEdit && hasSomethingChanged) {
           updateContentDebounced(activeFilePath, panel);
         }
       }, null);
@@ -107,23 +114,21 @@ function _getHtmlForWebview(extensionPath: string, content: string) {
   return `<!DOCTYPE html>
       <html lang="en">
       <head>
+          <style>
+            html, body, div {
+              width: 100% !important;
+              height: 100% !important;
+              max-width: 100% !important;
+              max-height: 100% !important;
+              background-color: white !important;
+            }
+          </style>
           <meta charset="UTF-8">
           <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}';">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <style>
-        html, body, #content {
-          width: 100vh;
-          height: 100vw;
-          max-width: 100vw;
-          max-height: 100vh;
-          background-color: white !important;
-        }
-      </style>
       <body>
-
           <script nonce="${nonce}" src="${scriptUri}"></script>
-
           <div id="content">${content}</div>
       </body>
       </html>`;
@@ -137,4 +142,13 @@ function getNonce() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+}
+
+function renderError(error: any) {
+  return `
+    <div>
+      <div>Some error occured:</div>
+      <div>${JSON.stringify(error)}</div>
+    </div>
+  `;
 }
