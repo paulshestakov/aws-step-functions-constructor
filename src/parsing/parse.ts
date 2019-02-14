@@ -1,6 +1,6 @@
 import * as yaml from "js-yaml";
-import * as fs from "fs";
 import * as path from "path";
+import * as vscode from "vscode";
 
 enum FileFormat {
   JSON,
@@ -21,26 +21,25 @@ function getFileFormat(filePath: string): FileFormat {
   }
 }
 
-async function readFile(filePath: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, "utf8", (error, data: string) => {
-      if (error) {
-        reject(JSON.stringify(error));
-      } else {
-        resolve(data);
-      }
-    });
-  });
+async function readFile(): Promise<any> {
+  const resource = vscode.window.activeTextEditor!.document.uri;
+  const document = await vscode.workspace.openTextDocument(resource);
+
+  return document.getText();
 }
 
 function parseFileStructure(fileFormat: FileFormat, rawText: string) {
-  switch (fileFormat) {
-    case FileFormat.JSON: {
-      return JSON.parse(rawText);
+  try {
+    switch (fileFormat) {
+      case FileFormat.JSON: {
+        return JSON.parse(rawText);
+      }
+      case FileFormat.YML: {
+        return yaml.safeLoad(rawText);
+      }
     }
-    case FileFormat.YML: {
-      return yaml.safeLoad(rawText);
-    }
+  } catch (error) {
+    throw new Error(`Error occured during parsing of file structure: ${error}`);
   }
 }
 
@@ -82,7 +81,7 @@ function getDefinition(document: any): Definition {
 
 export default async function parse(filePath: string) {
   const fileFormat = getFileFormat(filePath);
-  const rawData = await readFile(filePath);
+  const rawData = await readFile();
   const parsedData = parseFileStructure(fileFormat, rawData);
   const definition = getDefinition(parsedData);
   return definition;
