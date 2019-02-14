@@ -3,7 +3,7 @@
   "displayName": "aws-step-functions-constructor",
   "description": "",
   "icon": "images/sf.png",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "publisher": "paulshestakov",
   "repository": {
     "type": "git",
