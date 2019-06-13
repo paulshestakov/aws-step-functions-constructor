@@ -1,0 +1,24 @@
+HelloWorldName:
+  name: lametric-step
+  definition:
+    StartAt: Iterator
+    States:
+      Iterator:
+        Type: Task
+        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-request
+        ResultPath: "$.iterator"
+        Next: Pause
+      Pause:
+        Type: Wait
+        SecondsPath: "$.iterator.wait"
+        Next: IsCountReached
+      IsCountReached:
+        Type: Choice
+        Choices:
+          - Variable: "$.iterator.continue"
+            BooleanEquals: true
+            Next: Iterator
+        Default: Done
+      Done:
+        Type: Pass
+        End: true

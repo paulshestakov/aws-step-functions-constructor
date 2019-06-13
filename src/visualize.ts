@@ -64,12 +64,12 @@ function buildTransitions(stepFunction: StepFunction): SubgraphData {
         transitions.push(makeTransition(stateName, state.Default));
       }
 
-      const subgraphNames = state.Choices.map(choice => choice.Next);
-      if (state.Default) {
-        subgraphNames.push(state.Default);
-      }
-      const subgraphGroup = makeChoicesSubgraph(subgraphNames, "Choice");
-      transitions.push(subgraphGroup);
+      // const subgraphNames = state.Choices.map(choice => choice.Next);
+      // if (state.Default) {
+      //   subgraphNames.push(state.Default);
+      // }
+      // const subgraphGroup = makeChoicesSubgraph(subgraphNames, "Choice");
+      // transitions.push(subgraphGroup);
     }
   });
 
