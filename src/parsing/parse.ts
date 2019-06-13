@@ -1,6 +1,7 @@
 import * as yaml from "js-yaml";
 import * as path from "path";
 import * as vscode from "vscode";
+import * as fs from "fs";
 
 enum FileFormat {
   JSON,
@@ -59,13 +60,38 @@ function getDefinition(document: any): Definition {
     };
   }
 
-  // Serverless file
+  // Serverless file - take just first
   if (document.stepFunctions && document.stepFunctions.stateMachines) {
-    const firstName = Object.keys(document.stepFunctions.stateMachines)[0];
-    return document.stepFunctions.stateMachines[firstName].definition;
+    const stateMachinesNames = Object.keys(
+      document.stepFunctions.stateMachines
+    );
+    const firstName = stateMachinesNames[0];
+
+    const stateMachineValue = document.stepFunctions.stateMachines[firstName];
+
+    const isFileReference = typeof stateMachineValue === "string";
+
+    if (isFileReference) {
+      const [_, filePath, stateMachineName] = stateMachineValue.match(
+        /\$\{file\((.*)\):(.*)\}/
+      );
+      const absoluteFilePath = path.join(
+        vscode.window.activeTextEditor!.document.fileName,
+        "..",
+        filePath
+      );
+
+      const fileText = fs.readFileSync(absoluteFilePath, "utf-8");
+
+      const stateMachines = parseFileStructure(FileFormat.YML, fileText);
+
+      return stateMachines[stateMachineName].definition;
+    } else {
+      return document.stepFunctions.stateMachines[firstName].definition;
+    }
   }
 
-  // Serverless separate funcion declaration
+  // Serverless separate function declaration
   const flowName = Object.keys(document)[0];
   if (
     flowName &&
