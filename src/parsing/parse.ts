@@ -72,7 +72,7 @@ function getDefinition(document: any): Definition {
     const isFileReference = typeof stateMachineValue === "string";
 
     if (isFileReference) {
-      const [_, filePath, stateMachineName] = stateMachineValue.match(
+      const [, filePath, stateMachineName] = stateMachineValue.match(
         /\$\{file\((.*)\):(.*)\}/
       );
       const absoluteFilePath = path.join(
