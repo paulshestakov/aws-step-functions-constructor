@@ -115,19 +115,19 @@ function wrapInBranchCluster(str: string, label: string = ""): SubgraphData {
   return wrapInCluster(innerStr, label);
 }
 
-function makeChoicesSubgraph(statesNames: string[], label: string = "") {
-  const hash = ((Math.random() * 100) ^ 0) + "";
-  const escapedNamesString = statesNames.map(name => `"${name}";`).join("");
+// function makeChoicesSubgraph(statesNames: string[], label: string = "") {
+//   const hash = ((Math.random() * 100) ^ 0) + "";
+//   const escapedNamesString = statesNames.map(name => `"${name}";`).join("");
 
-  return `
-    subgraph cluster_${hash}_choices {
-        style=rounded;
-        color=lightgrey;
-        node [style=filled,color=white];
-        label = "${label}";
-        ${escapedNamesString}
-    }`;
-}
+//   return `
+//     subgraph cluster_${hash}_choices {
+//         style=rounded;
+//         color=lightgrey;
+//         node [style=filled,color=white];
+//         label = "${label}";
+//         ${escapedNamesString}
+//     }`;
+// }
 
 function makeSubgraph(statesNames: string[], label: string = ""): SubgraphData {
   const subgraphName = `cluster_${((Math.random() * 100) ^ 0) + ""}`;
