@@ -71,6 +71,10 @@ function buildTransitions(stepFunction: StepFunction): SubgraphData {
       // const subgraphGroup = makeChoicesSubgraph(subgraphNames, "Choice");
       // transitions.push(subgraphGroup);
     }
+    
+    if (!state.Next && state.End) {
+      transitions.push(`"${stateName}";`)
+    }
   });
 
   return {
