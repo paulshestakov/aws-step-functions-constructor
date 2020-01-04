@@ -13,14 +13,13 @@ async function updateContent(activeFilePath: string, panel) {
   try {
     const stepFunction = await parse(activeFilePath);
     renderingResult = await visualize(stepFunction);
+    panel.webview.postMessage({
+      command: "UPDATE",
+      data: renderingResult
+    });
   } catch (error) {
     renderingResult = renderError(error);
   }
-
-  panel.webview.postMessage({
-    command: "UPDATE",
-    data: renderingResult
-  });
 }
 
 const updateContentDebounced: any = debounce(updateContent, 300);
@@ -52,13 +51,15 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       try {
+        panel.webview.html = _getHtmlForWebview(context.extensionPath);
+
         const stepFunction = await parse(activeFilePath);
         const renderingResult = await visualize(stepFunction);
 
-        panel.webview.html = _getHtmlForWebview(
-          context.extensionPath,
-          renderingResult
-        );
+        panel.webview.postMessage({
+          command: "UPDATE",
+          data: renderingResult
+        });
       } catch (error) {
         console.log(error);
         logger.log(error);

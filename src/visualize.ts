@@ -1,7 +1,6 @@
-const Viz = require("viz.js");
-const { Module, render } = require("viz.js/full.render.js");
-let viz = new Viz({ Module, render });
 import { StepFunction } from "./interfaces";
+const dot = require("graphlib-dot");
+const graphlib = require("graphlib");
 
 interface SubgraphData {
   subgraph: string;
@@ -63,13 +62,6 @@ function buildTransitions(stepFunction: StepFunction): SubgraphData {
       if (state.Default) {
         transitions.push(makeTransition(stateName, state.Default));
       }
-
-      // const subgraphNames = state.Choices.map(choice => choice.Next);
-      // if (state.Default) {
-      //   subgraphNames.push(state.Default);
-      // }
-      // const subgraphGroup = makeChoicesSubgraph(subgraphNames, "Choice");
-      // transitions.push(subgraphGroup);
     }
     
     if (!state.Next && state.End) {
@@ -119,20 +111,6 @@ function wrapInBranchCluster(str: string, label: string = ""): SubgraphData {
   return wrapInCluster(innerStr, label);
 }
 
-// function makeChoicesSubgraph(statesNames: string[], label: string = "") {
-//   const hash = ((Math.random() * 100) ^ 0) + "";
-//   const escapedNamesString = statesNames.map(name => `"${name}";`).join("");
-
-//   return `
-//     subgraph cluster_${hash}_choices {
-//         style=rounded;
-//         color=lightgrey;
-//         node [style=filled,color=white];
-//         label = "${label}";
-//         ${escapedNamesString}
-//     }`;
-// }
-
 function makeSubgraph(statesNames: string[], label: string = ""): SubgraphData {
   const subgraphName = `cluster_${((Math.random() * 100) ^ 0) + ""}`;
   const escapedNamesString = statesNames.map(name => `"${name}";`).join("");
@@ -174,9 +152,13 @@ export default async function visualize(stepFunction: StepFunction) {
     digraph {
         compound=true;
 
+        node [rx=5 ry=5 labelStyle="font: 300 14px 'Helvetica Neue', Helvetica"]
+
+        "${stepFunction.StartAt}" [style="fill: #f77"];
+        "${getEndStateName(stepFunction)}" [style="fill: #FED362;"];
+
         ${buildTransitions(stepFunction).subgraph}
-        "${stepFunction.StartAt}" [style=filled, fillcolor="#FED362"];
-        "${getEndStateName(stepFunction)}" [style=filled, fillcolor="#FED362"];
+
 
         { rank = sink; "${getEndStateName(stepFunction)}"; }
         { rank = source; "${stepFunction.StartAt}"; }
@@ -184,7 +166,7 @@ export default async function visualize(stepFunction: StepFunction) {
     }
     `;
 
-  // console.log(str);
+  var graph = dot.read(str);
 
-  return await viz.renderString(str);
+  return JSON.stringify(graphlib.json.write(graph));
 }
