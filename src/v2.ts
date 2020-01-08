@@ -1,117 +1,98 @@
 import { StepFunction } from "./interfaces";
-
 import * as dagreD3 from "dagre-d3";
+const graphlib = dagreD3.graphlib;
+
+function makeGroupName() {
+  return `Group_${Math.random()}`;
+}
 
 export default async function visualize(stepFunction: StepFunction) {
   // Create a new directed graph
-  var g = new dagreD3.graphlib.Graph().setGraph({});
-
-  g.setNode("A", { label: "A" });
-
-  g.setEdge("TIME WAIT", "CLOSED", { label: "timeout=2MSL" });
-
-  // Set some general styles
-  g.nodes().forEach(function(v) {
-    var node = g.node(v);
-    node.rx = node.ry = 5;
-  });
-
-  // Add some custom colors based on state
-  g.node("CLOSED").style = "fill: #f77";
-  g.node("ESTAB").style = "fill: #7f7";
-}
-
-function buildTransitions(
-  stepFunction: StepFunction,
-  graph: dagreD3.graphlib.Graph
-) {
-  const transitions: any[] = [];
+  var g = new graphlib.Graph({ compound: true }).setGraph({}).setDefaultEdgeLabel(function () { return {}; });;
 
 
-  Object.keys(stepFunction.States).forEach(name => {
-    graph.setParent(name, clusterName);
-  });
+  function traverse(stepFunction: StepFunction, g, groupName?) {
+    const startAtName = stepFunction.StartAt
 
-  Object.keys(stepFunction.States).map(stateName => {
-    const state = stepFunction.States[stateName];
+    groupName && g.setParent(startAtName, groupName)
+    // g.setNode(startAtName, { label: startAtName, style: "fill: #aaffaa" })
 
-    if (state.Type === "Parallel") {
-      state.Branches.forEach(branch => {
-        graph.setEdge(stateName, branch.StartAt);
-
-        const { clusterName } = buildTransitions(branch, graph);
+    let statesToAddToParent = Object.keys(stepFunction.States);
 
 
-        parallelTransitions.push(subgraph);
-      });
 
-      const parallelBranchesSubgraphData = wrapInParallelCluster(
-        parallelTransitions.join("\n"),
-        "Parallel block"
-      );
-      transitions.push(parallelBranchesSubgraphData.subgraph);
+    Object.keys(stepFunction.States).forEach(stateName => {
+      const state = stepFunction.States[stateName];
 
-      transitions.push(
-        makeTransition(
-          state.Branches[0].StartAt,
-          state.Next,
-          parallelBranchesSubgraphData.subgraphName
-        )
-      );
-    }
 
-    if (state.Next && state.Type !== "Parallel") {
-      transitions.push(makeTransition(stateName, state.Next));
-    }
-
-    if (state.Catch) {
-      state.Catch.forEach((item: any) => {
-        transitions.push(makeCatchTransition(stateName, item.Next));
-      });
-    }
-
-    if (state.Choices) {
-      state.Choices.forEach(choice => {
-        transitions.push(makeTransition(stateName, choice.Next));
-      });
-
-      if (state.Default) {
-        transitions.push(makeTransition(stateName, state.Default));
+      if (stateName === startAtName && !groupName) {
+        g.setNode(stateName, { label: stateName, style: "fill: #fcba03;" });
+      } else {
+        g.setNode(stateName, { label: stateName });
       }
-    }
-  });
 
-  return {
-    graph,
-    clusterName
-  };
-}
+      switch (state.Type) {
+        case "Parallel": {
+          const groupName = makeGroupName();
+          g.setNode(groupName, { label: 'Parallel', style: "stroke: #f66; stroke-width: 3px; stroke-dasharray: 5, 5;", clusterLabelPos: 'top' });
 
-function getEndStateName(stepFunction: StepFunction) {
-  return Object.keys(stepFunction.States).find(stateName => {
-    const state = stepFunction.States[stateName];
+          state.Branches.forEach(branch => {
+            g.setEdge(stateName, branch.StartAt, { label: "" })
 
-    return !!state.End || state.Type === "Fail";
-  });
-}
+            traverse(branch, g, groupName);
 
-function makeSubgraph(
-  statesNames: string[],
-  label: string = "",
-  graph: dagreD3.graphlib.Graph
-) {
-  const clusterName = `cluster_${((Math.random() * 100) ^ 0) + ""}`;
+            Object.keys(branch.States).forEach(stateName => {
+              const branchEndState = branch.States[stateName];
+              if (branchEndState.End) {
 
-  graph.setNode(clusterName, {
-    label,
-    clusterLabelPos: "bottom",
-    style: "fill: #ffd47f"
-  });
-  statesNames.forEach(name => {
-    graph.setParent(name, clusterName);
-  });
+                g.setEdge(stateName, state.Next)
+              }
+            })
+          })
+          break;
+        }
+        case "Choice": {
+          if (state.Choices) {
+            const chioceGroupName = makeGroupName();
+            g.setNode(chioceGroupName, { label: 'Choice', style: 'fill: #ffd47f', clusterLabelPos: 'top' });
 
-  return {
-    clusterName
-  };
+            groupName && g.setParent(chioceGroupName, groupName)
+
+            state.Choices.forEach(choice => {
+              g.setEdge(stateName, choice.Next);
+              g.setParent(choice.Next, chioceGroupName);
+
+              statesToAddToParent = statesToAddToParent.filter(stateName => stateName !== choice.Next)
+            });
+
+            if (state.Default) {
+              g.setEdge(stateName, state.Default);
+              g.setParent(state.Default, chioceGroupName)
+
+              statesToAddToParent = statesToAddToParent.filter(stateName => stateName !== state.Default)
+            }
+          }
+        }
+        default: {
+          if (state.Next) {
+            g.setEdge(stateName, state.Next)
+          }
+        }
+      }
+
+    });
+
+    console.log(statesToAddToParent)
+    statesToAddToParent.forEach(stateName => {
+      groupName && g.setParent(stateName, groupName);
+
+    })
+  }
+
+  traverse(stepFunction, g);
+
+  const serialized = JSON.stringify(graphlib.json.write(g));
+  // console.log(serialized)
+  return serialized;
+
 }

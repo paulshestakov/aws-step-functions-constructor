@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const vscode = acquireVsCodeApi();
 
   console.log("JS code is included!");
@@ -17,7 +17,7 @@
         var svg = d3.select("svg"),
           inner = svg.select("g");
         // Set up zoom support
-        var zoom = d3.zoom().on("zoom", function() {
+        var zoom = d3.zoom().on("zoom", function () {
           inner.attr("transform", d3.event.transform);
         });
         svg.call(zoom);
@@ -45,7 +45,8 @@
             )
             .scale(initialScale)
         );
-        bre;
+        console.log(svg)
+        console.log(window)
         break;
     }
   });

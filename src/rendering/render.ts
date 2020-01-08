@@ -36,31 +36,39 @@ export function _getHtmlForWebview(extensionPath: string) {
                   border: none;
                 }
 
-                body {
-
-                }
-
                 .svgWrapper {
                   width: 100%;
                   height: 100%;
                   box-sizing: border-box;
                   border: 3px solid red;
                 }
-            </style>
-            <style id="css">
 
-            .node rect {
-              stroke: #333;
-              fill: #fff;
-            }
-            .edgePath path {
-              stroke: #333;
-              fill: #333;
-              stroke-width: 1.5px;
-            }
+
+                .clusters rect {
+                  fill: white;
+                  stroke: #999;
+                  stroke-width: 1.5px;
+                }
+                
+                text {
+                  font-weight: 300;
+                  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+                  font-size: 14px;
+                }
+                
+                .node rect {
+                  stroke: #999;
+                  fill: #fff;
+                  stroke-width: 1.5px;
+                }
+                
+                .edgePath path {
+                  stroke: #333;
+                  stroke-width: 1.5px;
+                }
             </style>
             <meta charset="UTF-8">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}';">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         </head>
