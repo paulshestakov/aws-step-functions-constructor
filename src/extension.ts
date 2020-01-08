@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import parse from "./parsing/parse";
-import visualize from "./visualize";
+import visualize from "./v2";
 import logger from "./logger";
 import * as path from "path";
 import { _getHtmlForWebview, renderError } from "./rendering/render";
