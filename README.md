@@ -6,20 +6,27 @@
 
 ## Features
 
-- Visualize Step functions in next formats:
+- Visualize step functions in next formats:
   - serverless.yml file
   - json or yml descriptions in [ASL](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html)
 - Live editing(when preview is opened in split mode)
 
 ### Commands
 
-Go into Command Palette <kbd>F1</kbd>
+Go into Command Palette and type
 ![Commands List](https://github.com/PaulShestakov/pics/blob/master/commandsList.png?raw=true)
 
-### Usage
+### Open is split view
 
-Split view Exapmle
-![Usage Example](https://github.com/PaulShestakov/pics/blob/master/sf.png?raw=true)
+![Usage Example](https://github.com/PaulShestakov/pics/blob/master/splitView.png?raw=true)
+
+### Live reload
+
+![Usage Example](https://github.com/PaulShestakov/pics/blob/master/live.gif?raw=true)
+
+### View choice conditionals
+
+![Usage Example](https://github.com/PaulShestakov/pics/blob/master/choice.png?raw=true)
 
 ## License
 

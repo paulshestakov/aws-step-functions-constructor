@@ -1,26 +1,22 @@
 import * as vscode from "vscode";
-import parse from "./parsing/parse";
-import visualize from "./visualize";
-import logger from "./logger";
+import parse from "./parseFile";
+import { buildGraph } from "./buildGraph";
 import * as path from "path";
-import { _getHtmlForWebview, renderError } from "./rendering/render";
-import { debounce } from "./util";
+import { _getHtmlForWebview } from "./rendering/render";
+import { debounce } from "./utils/debounce";
 
 async function updateContent(activeFilePath: string, panel) {
-  console.log("VSCE updateContent");
-  let renderingResult;
-
   try {
     const stepFunction = await parse(activeFilePath);
-    renderingResult = await visualize(stepFunction);
-  } catch (error) {
-    renderingResult = renderError(error);
-  }
+    const renderingResult = buildGraph(stepFunction);
 
-  panel.webview.postMessage({
-    command: "UPDATE",
-    data: renderingResult
-  });
+    panel.webview.postMessage({
+      command: "UPDATE",
+      data: renderingResult
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const updateContentDebounced: any = debounce(updateContent, 300);
@@ -51,18 +47,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
       );
 
-      try {
-        const stepFunction = await parse(activeFilePath);
-        const renderingResult = await visualize(stepFunction);
+      panel.webview.html = _getHtmlForWebview(context.extensionPath);
 
-        panel.webview.html = _getHtmlForWebview(
-          context.extensionPath,
-          renderingResult
-        );
-      } catch (error) {
-        console.log(error);
-        logger.log(error);
-      }
+      updateContent(activeFilePath, panel);
 
       vscode.workspace.onDidChangeTextDocument(async event => {
         const isActiveDocumentEdit =
@@ -81,8 +68,6 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
       }, null);
-
-      panel.webview.postMessage({ command: "refactor" });
     }
   );
 

@@ -18,10 +18,12 @@
               "Default": "F"
             },
             "E": {
-              "Type": "Task"
+              "Type": "Task",
+              "End": true
             },
             "F": {
-              "Type": "Task"
+              "Type": "Task",
+              "End": true
             }
           }
         },
