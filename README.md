@@ -11,6 +11,10 @@
   - json or yml descriptions in [ASL](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html)
 - Live editing(when preview is opened in split mode)
 
+### Commands
+
+Go into Command Palette and type
+![Commands List](https://github.com/PaulShestakov/pics/blob/master/commandsList.png?raw=true)
 
 ### Open is split view
 
@@ -23,12 +27,6 @@
 ### View choice conditionals
 
 ![Usage Example](https://github.com/PaulShestakov/pics/blob/master/choice.png?raw=true)
-
-### Commands
-
-Go into Command Palette and type
-![Commands List](https://github.com/PaulShestakov/pics/blob/master/commandsList.png?raw=true)
-
 
 ## License
 
