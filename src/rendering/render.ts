@@ -40,28 +40,26 @@ export function _getHtmlForWebview(extensionPath: string) {
                   width: 100%;
                   height: 100%;
                   box-sizing: border-box;
-                  border: 3px solid red;
                 }
-
 
                 .clusters rect {
                   fill: white;
                   stroke: #999;
                   stroke-width: 1.5px;
                 }
-                
+
                 text {
                   font-weight: 300;
                   font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
                   font-size: 14px;
                 }
-                
+
                 .node rect {
                   stroke: #999;
                   fill: #fff;
                   stroke-width: 1.5px;
                 }
-                
+
                 .edgePath path {
                   stroke: #333;
                   stroke-width: 1.5px;
