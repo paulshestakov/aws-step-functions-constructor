@@ -47,6 +47,11 @@ function parseFileStructure(fileFormat: FileFormat, rawText: string) {
 function isStateFunctionDefinition(document: any): boolean {
   return document.StartAt && document.States;
 }
+
+function isCloudformation(document: any) {
+  return !!document.AWSTemplateFormatVersion;
+}
+
 interface Definition {
   StartAt: string;
   States: any;
@@ -58,6 +63,21 @@ function getDefinition(document: any): Definition {
       StartAt: document.StartAt,
       States: document.States
     };
+  }
+
+  if (isCloudformation(document)) {
+    const sfResourceName = Object.keys(document.Resources).find(
+      resourceName => {
+        return (
+          document.Resources[resourceName].Type ===
+          "AWS::StepFunctions::StateMachine"
+        );
+      }
+    );
+    const sf = JSON.parse(
+      document.Resources[sfResourceName].Properties.DefinitionString
+    );
+    return sf;
   }
 
   // Serverless file - take just first
