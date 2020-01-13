@@ -37,9 +37,7 @@
   "devDependencies": {
     "@types/dagre-d3": "^0.4.39",
     "@types/js-yaml": "^3.11.2",
-    "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
-    "aws-sdk": "^2.390.0",
     "tslint": "^5.8.0",
     "typescript": "^2.9.2",
     "vscode": "^1.1.26"
@@ -47,9 +45,6 @@
   "dependencies": {
     "dagre": "^0.8.4",
     "dagre-d3": "^0.6.3",
-    "graphlib-dot": "^0.6.2",
-    "js-yaml": "^3.13.1",
-    "jsdom": "^15.1.1",
-    "viz.js": "^2.1.2"
+    "js-yaml": "^3.13.1"
   }
 }
