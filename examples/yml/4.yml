@@ -1,0 +1,48 @@
+Comment: A simple example of the Steps language using an AWS Lambda Function
+StartAt: Hello
+States:
+  Hello:
+    Type: Task
+    Resource: arn:aws:lambda:eu-west-1:99999999999:function:HelloWord_Step
+    Next: Parallel
+  Parallel:
+    Type: Parallel
+    Next: Goodbye
+    Branches:
+      - StartAt: Calculate PI
+        States:
+          Calculate PI:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            Next: Calculate Radius
+          Calculate Radius:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            Next: Calculate Area
+          Calculate Area:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            End: true
+      - StartAt: Calculate constant E
+        States:
+          Calculate constant E:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            Next: Make decision
+          Make decision:
+            Type: Choice
+            Choices:
+              - Next: Search record
+              - Next: Retrieve record
+          Search record:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            End: true
+          Retrieve record:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step
+            End: true
+  Goodbye:
+    Type: Task
+    Resource: arn:aws:lambda:eu-west-1:99999999999:function:HelloWord_Step
+    End: true

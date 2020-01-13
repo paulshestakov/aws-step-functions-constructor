@@ -4,27 +4,30 @@
 [![](https://vsmarketplacebadge.apphb.com/downloads-short/paulshestakov.aws-step-functions-constructor.svg)](https://marketplace.visualstudio.com/items?itemName=paulshestakov.aws-step-functions-constructor)
 [![](https://vsmarketplacebadge.apphb.com/installs/paulshestakov.aws-step-functions-constructor.svg)](https://marketplace.visualstudio.com/items?itemName=paulshestakov.aws-step-functions-constructor)
 
-## Features
 
-- Visualize step functions in next formats:
-  - serverless.yml file
-  - json or yml descriptions in [ASL](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html)
-- Live editing(when preview is opened in split mode)
+## Supported formats:
+- JSON or YML declaration in separate file
+- Stringifined declaration from cloudformation file
+- Serverless declaration from serverless.yml file
 
-### Commands
 
-Go into Command Palette and type
-![Commands List](https://github.com/PaulShestakov/pics/blob/master/commandsList.png?raw=true)
+## Open
 
-### Open is split view
+Go into Command Palette and type:
+```
+> Show step function
+```
+
+
+## Opened in split view
 
 ![Usage Example](https://github.com/PaulShestakov/pics/blob/master/splitView.png?raw=true)
 
-### Live reload
+## Live reload
 
 ![Usage Example](https://github.com/PaulShestakov/pics/blob/master/live.gif?raw=true)
 
-### View choice conditionals
+## View choice conditionals
 
 ![Usage Example](https://github.com/PaulShestakov/pics/blob/master/choice.png?raw=true)
 
@@ -35,3 +38,6 @@ This software is released under [MIT License](http://www.opensource.org/licenses
 ## Review
 
 Feedback and contributions welcome. Please leave a [review](https://marketplace.visualstudio.com/items?itemName=paulshestakov.aws-step-functions-constructor#review-details).
+
+## Info
+- [ASL](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html) - Amazon states language definition
