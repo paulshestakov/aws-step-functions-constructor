@@ -43,8 +43,8 @@
     "vscode": "^1.1.26"
   },
   "dependencies": {
-    "dagre": "^0.8.4",
-    "dagre-d3": "^0.6.3",
+    "dagre": "^0.8.5",
+    "dagre-d3": "^0.6.4",
     "js-yaml": "^3.13.1"
   }
 }
