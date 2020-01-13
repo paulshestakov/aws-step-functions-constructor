@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as fs from "fs";
 
 export function _getHtmlForWebview(extensionPath: string) {
   const scriptPathOnDisk = vscode.Uri.file(
@@ -12,13 +11,9 @@ export function _getHtmlForWebview(extensionPath: string) {
   const scriptPathOnDisk3 = vscode.Uri.file(
     path.join(extensionPath, "media", "dagre-d3.min.js")
   );
-  const scriptPathOnDisk4 = vscode.Uri.file(
-    path.join(extensionPath, "media", "gldot.js")
-  );
   const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
   const scriptUri2 = scriptPathOnDisk2.with({ scheme: "vscode-resource" });
   const scriptUri3 = scriptPathOnDisk3.with({ scheme: "vscode-resource" });
-  const scriptUri4 = scriptPathOnDisk4.with({ scheme: "vscode-resource" });
   const nonce = getNonce();
 
   return `<!DOCTYPE html>
