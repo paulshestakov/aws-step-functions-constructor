@@ -35,11 +35,10 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "@types/dagre-d3": "^0.4.39",
     "@types/js-yaml": "^3.11.2",
     "@types/node": "^8.10.25",
     "tslint": "^5.8.0",
-    "typescript": "^2.9.2",
+    "typescript": "^3.7.4",
     "vscode": "^1.1.26"
   },
   "dependencies": {

@@ -16,24 +16,6 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@types/d3@^3":
-  version "3.5.43"
-  resolved "https://registry.yarnpkg.com/@types/d3/-/d3-3.5.43.tgz#e9b4992817e0b6c5efaa7d6e5bb2cee4d73eab58"
-  integrity sha512-t9ZmXOcpVxywRw86YtIC54g7M9puRh8hFedRvVfHKf5YyOP6pSxA0TvpXpfseXSCInoW4P7bggTrSDiUOs4g5w==
-
-"@types/dagre-d3@^0.4.39":
-  version "0.4.39"
-  resolved "https://registry.yarnpkg.com/@types/dagre-d3/-/dagre-d3-0.4.39.tgz#bd5a05c7da366bb6e27e271f3ce1ff7cfc5b5c89"
-  integrity sha512-JZySpfIQPRSTx38B4P5pPGeV4Pqgb0qE/aIiS60qD+j0c3mYP/AHiiwlsrrLCVZWY7OJdvD3dp+aD1HvpjPBzA==
-  dependencies:
-    "@types/d3" "^3"
-    "@types/dagre" "*"
-
-"@types/dagre@*":
-  version "0.7.42"
-  resolved "https://registry.yarnpkg.com/@types/dagre/-/dagre-0.7.42.tgz#2b0cd7678d5fc273df7816a88b8b34016e3a5d85"
-  integrity sha512-knVdi1Ul8xYgJ0wdhQ+/2YGJFKJFa/5srcPII9zvOs4KhsHfpnFrSTQXATYmjslglxRMif3Lg+wEZ0beag+94A==
-
 "@types/js-yaml@^3.11.2":
   version "3.12.1"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
@@ -887,9 +869,10 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
-typescript@^2.9.2:
-  version "2.9.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
+typescript@^3.7.4:
+  version "3.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
+  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
 
 uri-js@^4.2.2:
   version "4.2.2"
