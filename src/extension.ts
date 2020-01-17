@@ -1,13 +1,17 @@
 import * as vscode from "vscode";
-import parse from "./parseFile";
+import parse from "./openedFile";
 import { buildGraph } from "./buildGraph";
 import * as path from "path";
-import { _getHtmlForWebview } from "./rendering/render";
+import { getWebviewHtmlTemplate } from "./rendering/render";
 import { debounce } from "./utils/debounce";
+import {
+  getActiveFilePath,
+  getStepFunctionViewName
+} from "./openedFile/openedFile";
 
-async function updateContent(activeFilePath: string, panel) {
+async function updateContent(panel) {
   try {
-    const stepFunction = await parse(activeFilePath);
+    const stepFunction = await parse();
     const renderingResult = buildGraph(stepFunction);
 
     panel.webview.postMessage({
@@ -21,43 +25,48 @@ async function updateContent(activeFilePath: string, panel) {
 
 const updateContentDebounced: any = debounce(updateContent, 300);
 
+function createWebviewPanel(context: vscode.ExtensionContext) {
+  const stepFunctionViewName = getStepFunctionViewName();
+
+  const resourceColumn =
+    (vscode.window.activeTextEditor &&
+      vscode.window.activeTextEditor.viewColumn) ||
+    vscode.ViewColumn.One;
+
+  return vscode.window.createWebviewPanel(
+    "stepFunction.constructor",
+    stepFunctionViewName,
+    resourceColumn + 1,
+    {
+      enableScripts: true,
+      localResourceRoots: [
+        vscode.Uri.file(path.join(context.extensionPath, "media"))
+      ]
+    }
+  );
+}
+
+function setWebviewHtmlTemplate(panel, context: vscode.ExtensionContext) {
+  panel.webview.html = getWebviewHtmlTemplate(context.extensionPath);
+}
+
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "extension.showStepFunction",
     async () => {
-      const activeFilePath = vscode.window.activeTextEditor!.document.uri
-        .fsPath;
+      const panel = createWebviewPanel(context);
 
-      const fileName = activeFilePath.split(/\/|\\/).reverse()[0];
+      setWebviewHtmlTemplate(panel, context);
 
-      const resourceColumn =
-        (vscode.window.activeTextEditor &&
-          vscode.window.activeTextEditor.viewColumn) ||
-        vscode.ViewColumn.One;
-
-      const panel = vscode.window.createWebviewPanel(
-        fileName,
-        fileName,
-        resourceColumn + 1,
-        {
-          enableScripts: true,
-          localResourceRoots: [
-            vscode.Uri.file(path.join(context.extensionPath, "media"))
-          ]
-        }
-      );
-
-      panel.webview.html = _getHtmlForWebview(context.extensionPath);
-
-      updateContent(activeFilePath, panel);
+      updateContent(panel);
 
       vscode.workspace.onDidChangeTextDocument(async event => {
         const isActiveDocumentEdit =
-          event.document.uri.fsPath === activeFilePath;
+          event.document.uri.fsPath === getActiveFilePath();
         const hasSomethingChanged = event.contentChanges.length > 0;
 
         if (isActiveDocumentEdit && hasSomethingChanged) {
-          updateContentDebounced(activeFilePath, panel);
+          updateContentDebounced(panel);
         }
       }, null);
 
