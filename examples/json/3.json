@@ -19,6 +19,10 @@
             },
             "E": {
               "Type": "Task",
+              "Next": "G"
+            },
+            "G": {
+              "Type": "Task",
               "End": true
             },
             "F": {

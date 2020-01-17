@@ -9,7 +9,6 @@ function makeGroupName() {
 }
 
 export function buildGraph(stepFunction: StepFunction) {
-  // Create a new directed graph
   var g = new graphlib.Graph({ compound: true })
     .setGraph({})
     .setDefaultEdgeLabel(function() {
@@ -19,15 +18,18 @@ export function buildGraph(stepFunction: StepFunction) {
   function traverse(stepFunction: StepFunction, g, groupName?) {
     const startAtName = stepFunction.StartAt;
 
-    groupName && g.setParent(startAtName, groupName);
-    // g.setNode(startAtName, { label: startAtName, style: "fill: #aaffaa" })
+    if (groupName) {
+      g.setParent(startAtName, groupName);
+    }
 
-    let statesToAddToParent = Object.keys(stepFunction.States);
+    let statesToAddToParent = new Set(Object.keys(stepFunction.States));
 
     Object.keys(stepFunction.States).forEach(stateName => {
       const state = stepFunction.States[stateName];
 
       if (stateName === startAtName && !groupName) {
+        g.setNode(stateName, { label: stateName, style: "fill: #fcba03;" });
+      } else if (state.End && !groupName) {
         g.setNode(stateName, { label: stateName, style: "fill: #fcba03;" });
       } else {
         g.setNode(stateName, { label: stateName });
@@ -65,26 +67,23 @@ export function buildGraph(stepFunction: StepFunction) {
               clusterLabelPos: "top"
             });
 
-            groupName && g.setParent(chioceGroupName, groupName);
+            if (groupName) {
+              g.setParent(chioceGroupName, groupName);
+            }
 
             state.Choices.forEach((choice: Operator) => {
               g.setEdge(stateName, choice.Next, {
-                label: stringifyChoiceOperator(choice)
+                label: stringifyChoiceOperator(choice),
+                labelStyle: "font-style: italic;"
               });
               g.setParent(choice.Next, chioceGroupName);
-
-              statesToAddToParent = statesToAddToParent.filter(
-                stateName => stateName !== choice.Next
-              );
+              statesToAddToParent.delete(choice.Next);
             });
 
             if (state.Default) {
               g.setEdge(stateName, state.Default);
               g.setParent(state.Default, chioceGroupName);
-
-              statesToAddToParent = statesToAddToParent.filter(
-                stateName => stateName !== state.Default
-              );
+              statesToAddToParent.delete(state.Default);
             }
           }
         }
@@ -96,10 +95,11 @@ export function buildGraph(stepFunction: StepFunction) {
       }
     });
 
-    console.log(statesToAddToParent);
-    statesToAddToParent.forEach(stateName => {
-      groupName && g.setParent(stateName, groupName);
-    });
+    if (groupName) {
+      [...statesToAddToParent].forEach(stateName => {
+        g.setParent(stateName, groupName);
+      });
+    }
   }
 
   traverse(stepFunction, g);
@@ -107,9 +107,7 @@ export function buildGraph(stepFunction: StepFunction) {
   ensureUnspecifiedNodes(g);
   roundNodes(g);
 
-  const serialized = JSON.stringify(graphlib.json.write(g));
-  // console.log(serialized)
-  return serialized;
+  return JSON.stringify(graphlib.json.write(g));
 }
 
 function ensureUnspecifiedNodes(g) {

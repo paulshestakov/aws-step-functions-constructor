@@ -45,9 +45,13 @@
               "Type": "Choice",
               "Choices": [
                 {
+                  "Variable": "$.value",
+                  "NumericGreaterThanEquals": 0,
                   "Next": "Search record"
                 },
                 {
+                  "Variable": "$.value",
+                  "NumericLessThan": 0,
                   "Next": "Retrieve record"
                 }
               ]
