@@ -13,11 +13,6 @@
           "Next": "Public"
         },
         {
-          "Variable": "$.value",
-          "NumericEquals": 0,
-          "Next": "ValueIsZero"
-        },
-        {
           "And": [
             {
               "Variable": "$.value",
@@ -29,6 +24,11 @@
             }
           ],
           "Next": "ValueInTwenties"
+        },
+        {
+          "Variable": "$.value",
+          "NumericEquals": 0,
+          "Next": "ValueIsZero"
         }
       ],
       "Default": "DefaultState"

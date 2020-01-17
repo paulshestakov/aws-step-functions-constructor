@@ -9,7 +9,9 @@ export function stringifyChoiceOperator(operator: Operator) {
     const { Variable, ...rest } = operator;
     const conditionName = Object.keys(rest)[0];
     const conditionValue = rest[conditionName];
-    return `(${operator.Variable} ${stringifyOperatorName(conditionName)} ${conditionValue})`;
+    return `(${stringifyVariable(operator.Variable)} ${stringifyOperatorName(
+      conditionName
+    )} ${conditionValue})`;
   };
 
   const traverse = (operator: Operator) => {
@@ -21,12 +23,16 @@ export function stringifyChoiceOperator(operator: Operator) {
 
       if (Array.isArray(rest[operatorName])) {
         const childOperators = rest[operatorName];
-        return `${operatorName} (${childOperators.map(traverse).join(", ")})`;
+        return `(${childOperators.map(traverse).join(` ${operatorName} `)})`;
       } else {
         const childOperator = rest[operatorName];
-        return `${operatorName} (${traverse(childOperator)})`;
+        return `(${operatorName} (${traverse(childOperator)}))`;
       }
     }
+  };
+
+  const stringifyVariable = (variable: string) => {
+    return variable.slice(2);
   };
 
   const stringifyOperatorName = (operatorName: string) => {

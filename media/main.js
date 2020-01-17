@@ -16,8 +16,6 @@
       case "UPDATE":
         const g = new dagreD3.graphlib.json.read(JSON.parse(message.data));
 
-        // console.log(message.data);
-
         var svg = d3.select("svg"),
           inner = svg.select("g");
         // Set up zoom support
