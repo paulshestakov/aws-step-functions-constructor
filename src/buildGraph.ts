@@ -1,4 +1,4 @@
-import { StepFunction } from "./interfaces";
+import { StepFunction } from "./interfaces/stepFunction";
 import { Operator } from "./interfaces/choice";
 import * as dagreD3 from "dagre-d3";
 import { stringifyChoiceOperator } from "./stepFunction";
