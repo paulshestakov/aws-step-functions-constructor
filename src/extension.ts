@@ -8,15 +8,20 @@ import {
   getActiveFilePath,
   getStepFunctionViewName
 } from "./openedFile/openedFile";
+import { getStates } from "./stepFunction";
 
 async function updateContent(panel) {
   try {
     const stepFunction = await parse();
-    const renderingResult = buildGraph(stepFunction);
+    const serializedGraph = buildGraph(stepFunction);
+    const states = getStates(stepFunction);
 
     panel.webview.postMessage({
       command: "UPDATE",
-      data: renderingResult
+      data: {
+        serializedGraph,
+        states
+      }
     });
   } catch (error) {
     console.log(error);
