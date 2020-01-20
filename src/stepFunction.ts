@@ -1,3 +1,4 @@
+import { StepFunction, State } from "./interfaces/stepFunction";
 import { Operator } from "./interfaces/choice";
 
 export function stringifyChoiceOperator(operator: Operator) {
@@ -57,4 +58,46 @@ export function stringifyChoiceOperator(operator: Operator) {
   } catch (error) {
     return "";
   }
+}
+
+export function getStates(stepFunction: StepFunction) {
+  const states = {};
+  traverseStepFunction(stepFunction, (stateName, state) => {
+    states[stateName] = oneLevelDeepClone(state);
+  });
+  return states;
+}
+
+function oneLevelDeepClone(object) {
+  return Object.keys(object).reduce((acc, key) => {
+    if (Array.isArray(object[key]) || typeof object[key] === "object") {
+      return acc;
+    }
+    const shortenedValue =
+      `${object[key]}`.length > 25
+        ? `${object[key]}`.slice(0, 25) + "..."
+        : object[key];
+
+    acc[key] = shortenedValue;
+    return acc;
+  }, {});
+}
+
+function traverseStepFunction(
+  stepFunction: StepFunction,
+  callback: (stateName: string, step: State) => void
+) {
+  Object.keys(stepFunction.States).forEach(stateName => {
+    const state = stepFunction.States[stateName];
+
+    callback(stateName, state);
+
+    switch (state.Type) {
+      case "Parallel": {
+        state.Branches.forEach(branch => {
+          traverseStepFunction(branch, callback);
+        });
+      }
+    }
+  });
 }

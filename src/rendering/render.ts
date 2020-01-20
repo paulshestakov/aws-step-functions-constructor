@@ -59,6 +59,24 @@ export function getWebviewHtmlTemplate(extensionPath: string) {
                   stroke: #333;
                   stroke-width: 1.5px;
                 }
+
+                .tooltip {
+                  padding: 5px;
+                  background-color: white;
+                  border: 1px solid grey;
+                  border-radius: 5px;
+                  color: black;
+                }
+                table, td, tr {
+                  border: none;
+                  border-collapse: collapse;
+                }
+                td {
+                  padding: 5px;
+                }
+                .tooltipTableRow:nth-child(odd) {
+                  background-color: #DDD !important;
+                }
             </style>
             <meta charset="UTF-8">
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}'; style-src 'unsafe-inline';">

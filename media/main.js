@@ -3,8 +3,19 @@
 
   console.log("JS code is included!");
 
-  function renderError() {
-    const error = "";
+  function renderObject(object) {
+    const rows = Object.keys(object).map(key => {
+      const value = object[key];
+      return `
+        <tr class="tooltipTableRow">
+          <td>${key}</td>
+          <td>${value}</td>
+        </tr>
+      `;
+    });
+    return `<table>
+      ${rows.join("")}
+    </table>`;
   }
 
   window.addEventListener("message", event => {
@@ -14,7 +25,11 @@
 
     switch (message.command) {
       case "UPDATE":
-        const g = new dagreD3.graphlib.json.read(JSON.parse(message.data));
+        const { serializedGraph, states } = message.data;
+
+        console.log(serializedGraph);
+
+        const g = new dagreD3.graphlib.json.read(JSON.parse(serializedGraph));
 
         var svg = d3.select("svg"),
           inner = svg.select("g");
@@ -31,7 +46,55 @@
             return selection.transition().duration(500);
           };
 
+          let isTooltipOpened = false;
+
+          var tooltip = d3
+            .select("body")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .style("backgroung-color", "green")
+            .attr("class", "tooltip");
+
           render(inner, g);
+
+          // inner.selectAll("g.node").on("click", function(data) {
+          //   if (isTooltipOpened) {
+          //     tooltip.style("visibility", "hidden");
+
+          //     isTooltipOpened = false;
+          //   } else {
+          //     tooltip
+          //       .style("visibility", "visible")
+          //       .style("top", d3.event.pageY - 10 + "px")
+          //       .style("left", d3.event.pageX + 10 + "px")
+          //       .html(renderObject(states[data]));
+
+          //     isTooltipOpened = true;
+          //   }
+          // });
+
+          inner
+            .selectAll("g.node")
+            .on("click", function(data) {
+              if (isTooltipOpened) {
+                isTooltipOpened = false;
+              }
+            })
+            .on("mouseover", function(data) {
+              return tooltip
+                .style("visibility", "visible")
+                .html(renderObject(states[data]));
+            })
+            .on("mousemove", function() {
+              return tooltip
+                .style("top", d3.event.pageY - 10 + "px")
+                .style("left", d3.event.pageX + 10 + "px");
+            })
+            .on("mouseout", function() {
+              return tooltip.style("visibility", "hidden");
+            });
 
           // Center the graph
           var initialScale = 1;
