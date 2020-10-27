@@ -18,7 +18,7 @@
           "States": {
             "Calculate PI": {
               "Type": "Lol kek",
-              "Resource": "frfrfrffrfrf",
+              "Resource": "frfrfrffrfrfcdcdcdccdcdcdcdcdcdcdcdcdcdcdcdcdc",
               "Next": "Calculate Radius"
             },
             "Calculate Radius": {
@@ -58,7 +58,7 @@
             },
             "Search record": {
               "Type": "Task",
-              "Resource": "dddddd",
+              "Resource": "ddddcddd",
               "End": true
             },
             "Retrieve record": {

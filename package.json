@@ -1,7 +1,7 @@
 {
   "name": "aws-step-functions-constructor",
   "displayName": "aws-step-functions-constructor",
-  "description": "",
+  "description": "Visualization of AWS step functions",
   "icon": "images/sf.png",
   "version": "0.6.3",
   "publisher": "paulshestakov",
@@ -13,7 +13,7 @@
     "vscode": "^1.28.0"
   },
   "categories": [
-    "Other"
+    "Visualization"
   ],
   "activationEvents": [
     "onCommand:extension.showStepFunction"
@@ -36,7 +36,9 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^3.11.2",
+    "@types/lodash": "^4.14.162",
     "@types/node": "^8.10.25",
+    "prettier": "^2.1.2",
     "tslint": "^5.8.0",
     "typescript": "^3.7.4",
     "vscode": "^1.1.26"
@@ -45,6 +47,7 @@
     "dagre": "^0.8.5",
     "dagre-d3": "^0.6.4",
     "js-yaml": "^3.13.1",
-    "json-source-map": "^0.6.1"
+    "json-source-map": "^0.6.1",
+    "lodash": "^4.17.20"
   }
 }
