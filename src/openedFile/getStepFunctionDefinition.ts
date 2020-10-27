@@ -29,7 +29,7 @@ function isServerlessSeparateDeclaration(document: any) {
   );
 }
 
-function getStepFunction(document: any): StepFunction {
+function getStepFunction(document: any, fileName): StepFunction {
   if (isStateFunctionDefinition(document)) {
     return {
       StartAt: document.StartAt,
@@ -67,11 +67,7 @@ function getStepFunction(document: any): StepFunction {
       const [, filePath, stateMachineName] = stateMachineValue.match(
         /\$\{file\((.*)\):(.*)\}/
       );
-      const absoluteFilePath = path.join(
-        vscode.window.activeTextEditor!.document.fileName,
-        "..",
-        filePath
-      );
+      const absoluteFilePath = path.join(fileName, "..", filePath);
 
       const fileText = fs.readFileSync(absoluteFilePath, "utf-8");
 

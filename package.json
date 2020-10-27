@@ -44,6 +44,7 @@
   "dependencies": {
     "dagre": "^0.8.5",
     "dagre-d3": "^0.6.4",
-    "js-yaml": "^3.13.1"
+    "js-yaml": "^3.13.1",
+    "json-source-map": "^0.6.1"
   }
 }

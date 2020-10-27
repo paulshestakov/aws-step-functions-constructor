@@ -1,15 +1,33 @@
-(function() {
-  // const vscode = acquireVsCodeApi();
+(function(window) {
+  const vscode = acquireVsCodeApi();
+
+  function makeId() {
+    return `${Math.random()}`;
+  }
+
+  window.f = function(id, stateName, statePropertyName) {
+    const statePropertyValue = document.getElementById(id).value;
+
+    vscode.postMessage({
+      command: "STATE_UPDATE",
+      data: {
+        stateName,
+        statePropertyValue,
+        statePropertyName
+      }
+    });
+  };
 
   console.log("JS code is included!");
 
-  function renderObject(object) {
+  function renderObject(data, object) {
     const rows = Object.keys(object).map(key => {
       const value = object[key];
+      const id = makeId();
       return `
         <tr class="tooltipTableRow">
           <td>${key}</td>
-          <td>${value}</td>
+          <td><input id="${id}" value="${value}" oninput="f('${id}', '${data}', '${key}')"/></td>
         </tr>
       `;
     });
@@ -59,42 +77,21 @@
 
           render(inner, g);
 
-          // inner.selectAll("g.node").on("click", function(data) {
-          //   if (isTooltipOpened) {
-          //     tooltip.style("visibility", "hidden");
+          inner.selectAll("g.node").on("click", function(data) {
+            if (isTooltipOpened) {
+              tooltip.style("visibility", "hidden");
 
-          //     isTooltipOpened = false;
-          //   } else {
-          //     tooltip
-          //       .style("visibility", "visible")
-          //       .style("top", d3.event.pageY - 10 + "px")
-          //       .style("left", d3.event.pageX + 10 + "px")
-          //       .html(renderObject(states[data]));
-
-          //     isTooltipOpened = true;
-          //   }
-          // });
-
-          inner
-            .selectAll("g.node")
-            .on("click", function(data) {
-              if (isTooltipOpened) {
-                isTooltipOpened = false;
-              }
-            })
-            .on("mouseover", function(data) {
-              return tooltip
+              isTooltipOpened = false;
+            } else {
+              tooltip
                 .style("visibility", "visible")
-                .html(renderObject(states[data]));
-            })
-            .on("mousemove", function() {
-              return tooltip
                 .style("top", d3.event.pageY - 10 + "px")
-                .style("left", d3.event.pageX + 10 + "px");
-            })
-            .on("mouseout", function() {
-              return tooltip.style("visibility", "hidden");
-            });
+                .style("left", d3.event.pageX + 10 + "px")
+                .html(renderObject(data, states[data]));
+
+              isTooltipOpened = true;
+            }
+          });
 
           // Center the graph
           var initialScale = 1;
@@ -118,4 +115,4 @@
         break;
     }
   });
-})();
+})(window);

@@ -17,18 +17,18 @@
           "StartAt": "Calculate PI",
           "States": {
             "Calculate PI": {
-              "Type": "Task",
-              "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step",
+              "Type": "Lol kek",
+              "Resource": "frfrfrffrfrf",
               "Next": "Calculate Radius"
             },
             "Calculate Radius": {
               "Type": "Task",
-              "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step",
+              "Resource": "arn:aws:lambda:euxsxsxxsxsx-west-1:...",
               "Next": "Calculate Area"
             },
             "Calculate Area": {
               "Type": "Task",
-              "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step",
+              "Resource": "fAnother resource",
               "End": true
             }
           }
@@ -58,7 +58,7 @@
             },
             "Search record": {
               "Type": "Task",
-              "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step",
+              "Resource": "dddddd",
               "End": true
             },
             "Retrieve record": {
