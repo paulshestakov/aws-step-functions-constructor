@@ -24,6 +24,12 @@ export function activate(context: vscode.ExtensionContext) {
       }, null);
 
       panel.webview.onDidReceiveMessage(makeHandleReceiveMessage(uri), null);
+
+      panel.onDidChangeViewState((event) => {
+        if (event.webviewPanel.visible) {
+          throttledPostData(panel, uri, fileName);
+        }
+      });
     }
   );
 

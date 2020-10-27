@@ -18,7 +18,7 @@
           "States": {
             "Calculate PI": {
               "Type": "Lol kek",
-              "Resource": "frfrfrffrfrfcdcdcdccdcdcdcdcdcdcdcdcdcdcdcdcdc",
+              "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:ClaculatePI_step",
               "Next": "Calculate Radius"
             },
             "Calculate Radius": {
@@ -28,7 +28,7 @@
             },
             "Calculate Area": {
               "Type": "Task",
-              "Resource": "fAnother resource",
+              "Resource": "Resource",
               "End": true
             }
           }

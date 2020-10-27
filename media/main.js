@@ -5,7 +5,7 @@
     return `${Math.random()}`;
   }
 
-  window.f = function(id, stateName, statePropertyName) {
+  window.magicPostMessage = function(id, stateName, statePropertyName) {
     const statePropertyValue = document.getElementById(id).value;
 
     vscode.postMessage({
@@ -27,7 +27,7 @@
       return `
         <tr class="tooltipTableRow">
           <td>${key}</td>
-          <td><input id="${id}" value="${value}" oninput="f('${id}', '${data}', '${key}')"/></td>
+          <td><input id="${id}" value="${value}" oninput="magicPostMessage('${id}', '${data}', '${key}')"/></td>
         </tr>
       `;
     });
@@ -44,8 +44,6 @@
     switch (message.command) {
       case "UPDATE":
         const { serializedGraph, states } = message.data;
-
-        console.log(serializedGraph);
 
         const g = new dagreD3.graphlib.json.read(JSON.parse(serializedGraph));
 
