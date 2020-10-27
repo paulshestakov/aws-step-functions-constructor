@@ -47,15 +47,15 @@
 
         const g = new dagreD3.graphlib.json.read(JSON.parse(serializedGraph));
 
-        var svg = d3.select("svg"),
+        const svg = d3.select("svg"),
           inner = svg.select("g");
         // Set up zoom support
-        var zoom = d3.zoom().on("zoom", function() {
+        const zoom = d3.zoom().on("zoom", function() {
           inner.attr("transform", d3.event.transform);
         });
-        svg.call(zoom);
+        svg.call(zoom).on("dblclick.zoom", null);
         // Create the renderer
-        var render = new dagreD3.render();
+        const render = new dagreD3.render();
         // Run the renderer. This is what draws the final graph.
         try {
           g.graph().transition = function(selection) {
@@ -64,7 +64,7 @@
 
           let isTooltipOpened = false;
 
-          var tooltip = d3
+          const tooltip = d3
             .select("body")
             .append("div")
             .style("position", "absolute")
@@ -75,24 +75,26 @@
 
           render(inner, g);
 
-          inner.selectAll("g.node").on("click", function(data) {
-            if (isTooltipOpened) {
-              tooltip.style("visibility", "hidden");
+          inner.selectAll("g.node")
+            .style("cursor", "pointer")
+            .on("click", function(data) {
+              if (isTooltipOpened) {
+                tooltip.style("visibility", "hidden");
 
-              isTooltipOpened = false;
-            } else {
-              tooltip
-                .style("visibility", "visible")
-                .style("top", d3.event.pageY - 10 + "px")
-                .style("left", d3.event.pageX + 10 + "px")
-                .html(renderObject(data, states[data]));
+                isTooltipOpened = false;
+              } else {
+                tooltip
+                  .style("visibility", "visible")
+                  .style("top", d3.event.pageY - 10 + "px")
+                  .style("left", d3.event.pageX + 10 + "px")
+                  .html(renderObject(data, states[data]));
 
-              isTooltipOpened = true;
-            }
-          });
+                isTooltipOpened = true;
+              }
+            });
 
           // Center the graph
-          var initialScale = 1;
+          const initialScale = 1;
 
           const svgWidth = +svg.style("width").slice(0, -2);
           const svgHeight = +svg.style("height").slice(0, -2);
