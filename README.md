@@ -1,4 +1,4 @@
-# Visualize aws step functions for Visual Studio Code
+# Visualize AWS step functions for Visual Studio Code
 
 [![](https://vsmarketplacebadge.apphb.com/version-short/paulshestakov.aws-step-functions-constructor.svg)](https://marketplace.visualstudio.com/items?itemName=paulshestakov.aws-step-functions-constructor)
 [![](https://vsmarketplacebadge.apphb.com/downloads-short/paulshestakov.aws-step-functions-constructor.svg)](https://marketplace.visualstudio.com/items?itemName=paulshestakov.aws-step-functions-constructor)
@@ -6,7 +6,7 @@
 
 ## Supported formats:
 
-- JSON or YML declaration in separate file
+- JSON or YML declaration
 - Stringifined declaration from cloudformation file
 - Serverless declaration from serverless.yml file
 
