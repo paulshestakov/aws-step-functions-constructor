@@ -2,12 +2,11 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as _ from "lodash";
 
-import parse from "./openedFile";
+import { parse } from "./file/file";
 import { buildGraph } from "./buildGraph";
-import { debounce } from "./utils/debounce";
 import { getStates } from "./stepFunction";
 import { getWebviewHtmlTemplate } from "./rendering/render";
-import { getStepFunctionViewName, getSourceMap } from "./openedFile/openedFile";
+import { getStepFunctionViewName, getSourceMap } from "./file/file";
 
 export const createWebviewPanel = (context: vscode.ExtensionContext) => {
   const stepFunctionViewName = getStepFunctionViewName();

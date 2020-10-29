@@ -1,7 +1,7 @@
-import { StepFunction, State } from "./interfaces/stepFunction";
-import { Operator } from "./interfaces/choice";
 import * as dagreD3 from "dagre-d3";
-import { stringifyChoiceOperator } from "./stepFunction";
+
+import { StepFunction, Operator, stringifyChoiceOperator } from "./stepFunction";
+
 const graphlib = dagreD3.graphlib;
 
 function makeGroupName() {
@@ -11,7 +11,7 @@ function makeGroupName() {
 export function buildGraph(stepFunction: StepFunction) {
   var g = new graphlib.Graph({ compound: true })
     .setGraph({})
-    .setDefaultEdgeLabel(function() {
+    .setDefaultEdgeLabel(function () {
       return {};
     });
 
@@ -122,7 +122,7 @@ function ensureUnspecifiedNodes(g) {
 }
 
 function roundNodes(g) {
-  g.nodes().forEach(function(v) {
+  g.nodes().forEach(function (v) {
     var node = g.node(v);
     if (node) {
       node.rx = node.ry = 5;

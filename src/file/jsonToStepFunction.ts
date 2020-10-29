@@ -1,10 +1,8 @@
 import * as fs from "fs";
-import * as vscode from "vscode";
 import * as path from "path";
-import { parseText } from "./parseText";
-import { FileFormat } from "./openedFile";
 
-import { StepFunction } from "../interfaces/stepFunction";
+import { FileFormat, parseText } from "./file";
+import { StepFunction } from "../stepFunction";
 
 function isStateFunctionDefinition(document: any): boolean {
   return document.StartAt && document.States;
@@ -29,7 +27,7 @@ function isServerlessSeparateDeclaration(document: any) {
   );
 }
 
-function getStepFunction(document: any, fileName): StepFunction {
+export const documentToStepFunction = (document: any, fileName): StepFunction => {
   if (isStateFunctionDefinition(document)) {
     return {
       StartAt: document.StartAt,
@@ -86,5 +84,3 @@ function getStepFunction(document: any, fileName): StepFunction {
 
   throw new Error("Could not extract function definition");
 }
-
-export { getStepFunction };
