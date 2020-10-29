@@ -5,7 +5,6 @@ import * as _ from "lodash";
 import { parse } from "./file/file";
 import { buildGraph } from "./buildGraph";
 import { getStates } from "./stepFunction";
-import { getWebviewHtmlTemplate } from "./rendering/render";
 import { getStepFunctionViewName, getSourceMap } from "./file/file";
 
 export const createWebviewPanel = (context: vscode.ExtensionContext) => {
@@ -27,10 +26,6 @@ export const createWebviewPanel = (context: vscode.ExtensionContext) => {
       ]
     }
   );
-}
-
-export const renderTemplate = (panel, context: vscode.ExtensionContext) => {
-  panel.webview.html = getWebviewHtmlTemplate(context.extensionPath);
 }
 
 export const postData = async (panel, uri, fileName) => {

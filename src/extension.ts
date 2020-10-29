@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { createWebviewPanel, renderTemplate, postData, throttledPostData, makeHandleReceiveMessage } from "./webView";
+import { createWebviewPanel, postData, throttledPostData, makeHandleReceiveMessage } from "./webView";
+import { renderTemplate } from "./renderTemplate"
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
@@ -9,8 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
       const fileName = vscode.window.activeTextEditor!.document.fileName;
 
       const panel = createWebviewPanel(context);
-
-      renderTemplate(panel, context);
+      panel.webview.html = renderTemplate(context.extensionPath);
 
       postData(panel, uri, fileName);
 

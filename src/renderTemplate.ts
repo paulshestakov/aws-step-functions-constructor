@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 
-export function getWebviewHtmlTemplate(extensionPath: string) {
+export function renderTemplate(extensionPath: string) {
   const scriptPathOnDisk = vscode.Uri.file(
     path.join(extensionPath, "media", "main.js")
   );
