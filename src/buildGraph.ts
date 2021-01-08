@@ -1,11 +1,12 @@
 import * as dagreD3 from "dagre-d3";
+import { v4 as uuidv4 } from 'uuid';
 
 import { StepFunction, Operator, stringifyChoiceOperator } from "./stepFunction";
 
 const graphlib = dagreD3.graphlib;
 
 function makeGroupName() {
-  return `Group_${Math.random()}`;
+  return `Group_${uuidv4()}`;
 }
 
 export function buildGraph(stepFunction: StepFunction) {

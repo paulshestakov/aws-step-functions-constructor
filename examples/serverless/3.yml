@@ -1,6 +1,0 @@
-service: hello-world
-
-stepFunctions:
-  stateMachines:
-    HelloWorldName:
-      ${file(3_1/3_1.yml):HelloWorldName}
