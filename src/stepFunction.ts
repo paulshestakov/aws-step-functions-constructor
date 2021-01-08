@@ -3,15 +3,36 @@ export interface StepFunction {
   States: Record<string, State>;
 }
 
-export interface State {
-  Next: string;
+interface BaseState {
   Type: string;
+
+  Next: string;
+  Catch: any[];
+  End: boolean;
+}
+
+interface TaskState extends BaseState {
+  Type: "Task";
+  Resource: string;
+}
+
+interface MapState extends BaseState {
+  Type: "Map";
+  Iterator: StepFunction;
+}
+
+interface ChoiceState extends BaseState {
+  Type: "Choice";
   Choices?: Choice[];
   Default: string;
-  End: boolean;
-  Catch: any[];
+}
+
+interface ParallelState extends BaseState {
+  Type: "Parallel";
   Branches: StepFunction[];
 }
+
+type State = TaskState | MapState | ChoiceState | ParallelState;
 
 export interface Choice {
   Type: string;
@@ -57,9 +78,7 @@ export function stringifyChoiceOperator(operator: Operator) {
     const { Variable, ...rest } = operator;
     const conditionName = Object.keys(rest)[0];
     const conditionValue = rest[conditionName];
-    return `(${stringifyVariable(operator.Variable)} ${stringifyOperatorName(
-      conditionName
-    )} ${conditionValue})`;
+    return `(${stringifyVariable(operator.Variable)} ${stringifyOperatorName(conditionName)} ${conditionValue})`;
   };
 
   const traverse = (operator: Operator) => {
@@ -120,30 +139,30 @@ function oneLevelDeepClone(object) {
     if (Array.isArray(object[key]) || typeof object[key] === "object") {
       return acc;
     }
-    const shortenedValue =
-      `${object[key]}`.length > 25
-        ? `${object[key]}`.slice(0, 25) + "..."
-        : object[key];
+    const shortenedValue = `${object[key]}`.length > 25 ? `${object[key]}`.slice(0, 25) + "..." : object[key];
 
     acc[key] = shortenedValue;
     return acc;
   }, {});
 }
 
-function traverseStepFunction(
-  stepFunction: StepFunction,
-  callback: (stateName: string, step: State) => void
-) {
-  Object.keys(stepFunction.States).forEach(stateName => {
+// FIXME: What the hell is that?
+function traverseStepFunction(stepFunction: StepFunction, callback: (stateName: string, step: State) => void) {
+  Object.keys(stepFunction.States).forEach((stateName) => {
     const state = stepFunction.States[stateName];
 
     callback(stateName, state);
 
     switch (state.Type) {
       case "Parallel": {
-        state.Branches.forEach(branch => {
+        state.Branches.forEach((branch) => {
           traverseStepFunction(branch, callback);
         });
+        break;
+      }
+      case "Map": {
+        traverseStepFunction(state.Iterator, callback);
+        break;
       }
     }
   });

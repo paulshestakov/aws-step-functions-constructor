@@ -41,12 +41,9 @@ export function buildGraph(stepFunction: StepFunction) {
             style: "stroke: #000; stroke-width: 3px; stroke-dasharray: 5, 5;",
             clusterLabelPos: "top",
           });
-
           state.Branches.forEach((branch) => {
             g.setEdge(stateName, branch.StartAt, { label: "" });
-
             traverse(branch, g, newGroupName);
-
             R.toPairs(branch.States)
               .filter(([branchStateName, branchState]) => Boolean(branchState.End))
               .forEach(([branchStateName, branchState]) => g.setEdge(branchStateName, state.Next));
@@ -84,6 +81,25 @@ export function buildGraph(stepFunction: StepFunction) {
               statesToAddToParent.delete(state.Default);
             }
           }
+          break;
+        }
+        case "Map": {
+          const newGroupName = makeGroupName();
+          g.setNode(newGroupName, {
+            label: "Map",
+            style: "stroke: #000; stroke-width: 3px; stroke-dasharray: 5, 5;",
+            clusterLabelPos: "top",
+          });
+          if (groupName) {
+            g.setParent(newGroupName, groupName);
+          }
+          const branch = state.Iterator;
+          g.setEdge(stateName, branch.StartAt, { label: "" });
+          traverse(branch, g, newGroupName);
+          R.toPairs(branch.States)
+            .filter(([branchStateName, branchState]) => Boolean(branchState.End))
+            .forEach(([branchStateName, branchState]) => g.setEdge(branchStateName, state.Next));
+          break;
         }
         default: {
           if (state.Next) {

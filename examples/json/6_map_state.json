@@ -1,0 +1,85 @@
+{
+  "Comment": "An example of the Amazon States Language for reading messages from an SQS queue and iteratively processing each message.",
+  "StartAt": "Read Messages from SQS Queue",
+  "States": {
+    "Read Messages from SQS Queue": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "FunctionName": "MapSampleProj-ReadFromSQSQueueLambda-1MY3M63RMJVA9"
+      },
+      "Next": "Are there messages to process?"
+    },
+    "Are there messages to process?": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$",
+          "StringEquals": "No messages",
+          "Next": "Finish"
+        }
+      ],
+      "Default": "Process messages"
+    },
+    "Process messages": {
+      "Type": "Map",
+      "Next": "Finish",
+      "ItemsPath": "$",
+      "Parameters": {
+        "MessageNumber.$": "$$.Map.Item.Index",
+        "MessageDetails.$": "$$.Map.Item.Value"
+      },
+      "Iterator": {
+        "StartAt": "Write message to DynamoDB",
+        "States": {
+          "Write message to DynamoDB": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::dynamodb:putItem",
+            "ResultPath": null,
+            "Parameters": {
+              "TableName": "MapSampleProj-DDBTable-YJDJ1MKIN6C5",
+              "ReturnConsumedCapacity": "TOTAL",
+              "Item": {
+                "MessageId": {
+                  "S.$": "$.MessageDetails.MessageId"
+                },
+                "Body": {
+                  "S.$": "$.MessageDetails.Body"
+                }
+              }
+            },
+            "Next": "Remove message from SQS queue"
+          },
+          "Remove message from SQS queue": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "InputPath": "$.MessageDetails",
+            "ResultPath": null,
+            "Parameters": {
+              "FunctionName": "MapSampleProj-DeleteFromSQSQueueLambda-198J2839ZO5K2",
+              "Payload": {
+                "ReceiptHandle.$": "$.ReceiptHandle"
+              }
+            },
+            "Next": "Publish message to SNS topic"
+          },
+          "Publish message to SNS topic": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::sns:publish",
+            "InputPath": "$.MessageDetails",
+            "Parameters": {
+              "Subject": "Message from Step Functions!",
+              "Message.$": "$.Body",
+              "TopicArn": "arn:aws:sns:us-east-1:012345678910:MapSampleProj-SNSTopic-1CQO4HQ3IR1KN"
+            },
+            "End": true
+          }
+        }
+      }
+    },
+    "Finish": {
+      "Type": "Succeed"
+    }
+  }
+}
