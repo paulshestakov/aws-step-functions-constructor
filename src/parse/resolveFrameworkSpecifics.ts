@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { FileFormat, parseText } from "./file";
+import { FileFormat, parseText } from "./parse";
 import { StepFunction } from "../stepFunction";
 
 function isStateFunctionDefinition(document: any): boolean {
@@ -27,7 +27,7 @@ function isServerlessSeparateDeclaration(document: any) {
   );
 }
 
-export const documentToStepFunction = (document: any, fileName): StepFunction => {
+export const resolveFrameworkSpecifics = (document: any, fileName): StepFunction => {
   if (isStateFunctionDefinition(document)) {
     return {
       StartAt: document.StartAt,

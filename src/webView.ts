@@ -1,92 +1,124 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as _ from "lodash";
 
-import { parse } from "./file/file";
-import { buildGraph } from "./buildGraph";
-import { getStates } from "./stepFunction";
-import { getStepFunctionViewName, getSourceMap } from "./file/file";
+import { getStepFunctionViewName } from "./parse/parse";
 
 export const createWebviewPanel = (context: vscode.ExtensionContext) => {
   const stepFunctionViewName = getStepFunctionViewName();
 
   const resourceColumn =
-    (vscode.window.activeTextEditor &&
-      vscode.window.activeTextEditor.viewColumn) ||
-    vscode.ViewColumn.One;
+    (vscode.window.activeTextEditor && vscode.window.activeTextEditor.viewColumn) || vscode.ViewColumn.One;
 
-  return vscode.window.createWebviewPanel(
-    "stepFunction.constructor",
-    stepFunctionViewName,
-    resourceColumn + 1,
-    {
-      enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.file(path.join(context.extensionPath, "media"))
-      ]
-    }
-  );
+  const panel = vscode.window.createWebviewPanel("stepFunction.constructor", stepFunctionViewName, resourceColumn + 1, {
+    enableScripts: true,
+    localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, "media"))],
+  });
+
+  panel.webview.html = renderTemplate(context.extensionPath);
+  return panel;
+};
+
+export function renderTemplate(extensionPath: string) {
+  const scriptPathOnDisk = vscode.Uri.file(path.join(extensionPath, "media", "main.js"));
+  const scriptPathOnDisk2 = vscode.Uri.file(path.join(extensionPath, "media", "d3min.js"));
+  const scriptPathOnDisk3 = vscode.Uri.file(path.join(extensionPath, "media", "dagre-d3.min.js"));
+  const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
+  const scriptUri2 = scriptPathOnDisk2.with({ scheme: "vscode-resource" });
+  const scriptUri3 = scriptPathOnDisk3.with({ scheme: "vscode-resource" });
+  const nonce = getNonce();
+
+  return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <style>
+                html, body {
+                  width: 100% !important;
+                  height: 100% !important;
+                  max-width: 100% !important;
+                  max-height: 100% !important;
+                  background-color: white !important;
+                  margin: 0;
+                  padding: 0;
+                  border: none;
+                }
+
+                .svgWrapper {
+                  width: 100%;
+                  height: 100%;
+                  box-sizing: border-box;
+                }
+
+                .clusters rect {
+                  fill: white;
+                  stroke: #999;
+                  stroke-width: 1.5px;
+                }
+
+                text {
+                  font-weight: 300;
+                  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+                  font-size: 14px;
+                }
+
+                .node rect, .node circle {
+                  stroke: #999;
+                  fill: #fff;
+                  stroke-width: 1.5px;
+                }
+
+                .edgePath path {
+                  stroke: #333;
+                  stroke-width: 1.5px;
+                }
+
+                .tooltip {
+                  padding: 5px;
+                  background-color: white;
+                  border: 1px solid grey;
+                  border-radius: 5px;
+                  color: black;
+                }
+                table, td, tr {
+                  border: none;
+                  border-collapse: collapse;
+                }
+                td {
+                  padding: 5px;
+                }
+                .tooltipTableRow:nth-child(odd) {
+                  background-color: #DDD !important;
+                }
+            </style>
+            <meta charset="UTF-8">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src vscode-resource: 'unsafe-inline'; style-src 'unsafe-inline';">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        </head>
+        <body id="body">
+            <div class="svgWrapper">
+              <svg width="100%" height="100%"><g/></svg>
+            </div>
+            <script nonce="${nonce}" src="${scriptUri2}"></script>
+            <script nonce="${nonce}" src="${scriptUri3}"></script>
+            <script nonce="${nonce}" src="${scriptUri}"></script>
+        </body>
+    </html>`;
 }
 
-export const postData = async (panel, uri, fileName) => {
-  try {
-    const stepFunction = await parse(uri, fileName);
-    const serializedGraph = buildGraph(stepFunction);
-    const states = getStates(stepFunction);
-
-    panel.webview.postMessage({
-      command: "UPDATE",
-      data: {
-        serializedGraph,
-        states
-      }
-    });
-  } catch (error) {
-    console.log(error);
+function getNonce() {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
+  return text;
 }
-export const throttledPostData: any = _.throttle(postData, 200);
 
-export const makeHandleReceiveMessage = (uri: vscode.Uri) => async message => {
-  switch (message.command) {
-    case "STATE_UPDATE":
-      const sourceMap = await getSourceMap(uri);
-
-      const pointer = Object.keys(sourceMap.pointers).find(key => {
-        return key.endsWith(
-          `${message.data.stateName}/${message.data.statePropertyName}`
-        );
-      });
-      if (!pointer) {
-        return;
-      }
-
-      const pointerMap = sourceMap.pointers[pointer];
-
-      vscode.workspace.openTextDocument(uri).then(document => {
-        const edit = new vscode.WorkspaceEdit();
-
-        var textRange = new vscode.Range(
-          pointerMap.value.line,
-          pointerMap.value.column + 1,
-          pointerMap.valueEnd.line,
-          pointerMap.valueEnd.column - 1
-        );
-
-        edit.replace(
-          document.uri,
-          textRange,
-          message.data.statePropertyValue
-        );
-
-        vscode.workspace.applyEdit(edit).then(
-          editsApplied => {
-          },
-          reason => {
-            vscode.window.showErrorMessage(`Error applying edits`);
-          }
-        );
-      });
-      return;
-  }
+export function renderError(error: any) {
+  return `
+      <div>
+        <div>Some error occured:</div>
+        <div>${JSON.stringify(error)}</div>
+      </div>
+    `;
 }

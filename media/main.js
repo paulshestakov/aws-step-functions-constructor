@@ -122,7 +122,6 @@
         } catch (error) {
           console.log(error);
         }
-
         break;
     }
   });

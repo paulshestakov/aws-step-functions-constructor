@@ -5,7 +5,6 @@ export interface StepFunction {
 
 interface BaseState {
   Type: string;
-
   Next: string;
   Catch: any[];
   End: boolean;
@@ -23,26 +22,8 @@ interface MapState extends BaseState {
 
 interface ChoiceState extends BaseState {
   Type: "Choice";
-  Choices?: Choice[];
+  Choices?: Operator[];
   Default: string;
-}
-
-interface ParallelState extends BaseState {
-  Type: "Parallel";
-  Branches: StepFunction[];
-}
-
-type State = TaskState | MapState | ChoiceState | ParallelState;
-
-export interface Choice {
-  Type: string;
-  Next?: string;
-  End?: true | undefined;
-  Comment?: string;
-  OutputPath?: string | null;
-  InputPath?: string | null;
-  Choices: Operator[];
-  Default?: string;
 }
 
 export interface Operator {
@@ -69,10 +50,15 @@ export interface Operator {
   TimestampLessThanEquals?: string;
 }
 
+interface ParallelState extends BaseState {
+  Type: "Parallel";
+  Branches: StepFunction[];
+}
+
+type State = TaskState | MapState | ChoiceState | ParallelState;
+
 export function stringifyChoiceOperator(operator: Operator) {
-  const isLeaf = (operator: Operator) => {
-    return !!operator.Variable;
-  };
+  const isLeaf = (operator: Operator) => Boolean(operator.Variable);
 
   const stringifyLeaf = (operator: Operator) => {
     const { Variable, ...rest } = operator;
@@ -98,9 +84,7 @@ export function stringifyChoiceOperator(operator: Operator) {
     }
   };
 
-  const stringifyVariable = (variable: string) => {
-    return variable.slice(2);
-  };
+  const stringifyVariable = (variable: string) => variable.slice(2);
 
   const stringifyOperatorName = (operatorName: string) => {
     switch (true) {
