@@ -4,9 +4,7 @@ import * as R from "ramda";
 
 import { StepFunction, Operator, stringifyChoiceOperator } from "./stepFunction";
 
-function makeGroupName() {
-  return `Group_${uuidv4()}`;
-}
+const makeGroupName = () => `Group_${uuidv4()}`;
 
 const attachStartNode = (g: graphlib.Graph, stateName: string) => {
   const magicStartNodeName = `Start_${uuidv4()}`;
@@ -20,6 +18,28 @@ const attachEndNode = (g: graphlib.Graph, stateName: string) => {
   g.setEdge(stateName, magicEndNodeName);
 };
 
+const ensureUnspecifiedNodes = (g: graphlib.Graph) => {
+  g.edges().forEach((edge) => {
+    if (!g.node(edge.v)) {
+      g.setNode(edge.v, { label: edge.v, style: "fill: #ff0000;" });
+    }
+    if (!g.node(edge.w)) {
+      g.setNode(edge.w, { label: edge.w, style: "fill: #ff0000;" });
+    }
+  });
+};
+
+const roundNodes = (g: graphlib.Graph) => {
+  g.nodes().forEach(function (v) {
+    var node = g.node(v);
+    if (node) {
+      node.rx = node.ry = 5;
+    }
+  });
+};
+
+const stroke = "#999";
+
 export function buildGraph(stepFunction: StepFunction) {
   var g = new graphlib.Graph({ compound: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
 
@@ -30,7 +50,7 @@ export function buildGraph(stepFunction: StepFunction) {
       g.setParent(startAtName, groupName);
     }
 
-    let statesToAddToParent = new Set(Object.keys(stepFunction.States));
+    const statesToAddToParent = new Set(Object.keys(stepFunction.States));
 
     R.toPairs(stepFunction.States).forEach(([stateName, state]) => {
       g.setNode(stateName, { label: stateName });
@@ -47,11 +67,11 @@ export function buildGraph(stepFunction: StepFunction) {
           const newGroupName = makeGroupName();
           g.setNode(newGroupName, {
             label: "Parallel",
-            style: "stroke: #000; stroke-width: 3px; stroke-dasharray: 5, 5;",
+            style: `stroke: ${stroke}; stroke-width: 2px; stroke-dasharray: 8, 4; rx: 5;`,
             clusterLabelPos: "top",
           });
           state.Branches.forEach((branch) => {
-            g.setEdge(stateName, branch.StartAt, { label: "" });
+            g.setEdge(stateName, branch.StartAt);
             traverse(branch, g, newGroupName);
             R.toPairs(branch.States)
               .filter(([branchStateName, branchState]) => Boolean(branchState.End))
@@ -64,7 +84,7 @@ export function buildGraph(stepFunction: StepFunction) {
             const newGroupName = makeGroupName();
             g.setNode(newGroupName, {
               label: "Choice",
-              style: "fill: #d9dddc",
+              style: "fill: #d9dddc; rx: 5;",
               clusterLabelPos: "top",
             });
 
@@ -96,14 +116,14 @@ export function buildGraph(stepFunction: StepFunction) {
           const newGroupName = makeGroupName();
           g.setNode(newGroupName, {
             label: "Map",
-            style: "stroke: #000; stroke-width: 3px; stroke-dasharray: 5, 5;",
+            style: `stroke: ${stroke}; stroke-width: 2px; stroke-dasharray: 8, 4; rx: 5;`,
             clusterLabelPos: "top",
           });
           if (groupName) {
             g.setParent(newGroupName, groupName);
           }
           const branch = state.Iterator;
-          g.setEdge(stateName, branch.StartAt, { label: "" });
+          g.setEdge(stateName, branch.StartAt);
           traverse(branch, g, newGroupName);
           R.toPairs(branch.States)
             .filter(([branchStateName, branchState]) => Boolean(branchState.End))
@@ -130,24 +150,4 @@ export function buildGraph(stepFunction: StepFunction) {
   roundNodes(g);
 
   return JSON.stringify(graphlib.json.write(g));
-}
-
-function ensureUnspecifiedNodes(g) {
-  g.edges().forEach((edge) => {
-    if (!g.node(edge.v)) {
-      g.setNode(edge.v, { label: edge.v, style: "fill: #ff0000;" });
-    }
-    if (!g.node(edge.w)) {
-      g.setNode(edge.w, { label: edge.w, style: "fill: #ff0000;" });
-    }
-  });
-}
-
-function roundNodes(g) {
-  g.nodes().forEach(function (v) {
-    var node = g.node(v);
-    if (node) {
-      node.rx = node.ry = 5;
-    }
-  });
 }

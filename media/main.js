@@ -1,11 +1,11 @@
-(function(window) {
+(function (window) {
   const vscode = acquireVsCodeApi();
 
   function makeId() {
     return `${Math.random()}`;
   }
 
-  window.magicPostMessage = function(id, stateName, statePropertyName) {
+  window.magicPostMessage = function (id, stateName, statePropertyName) {
     const statePropertyValue = document.getElementById(id).value;
 
     vscode.postMessage({
@@ -13,15 +13,15 @@
       data: {
         stateName,
         statePropertyValue,
-        statePropertyName
-      }
+        statePropertyName,
+      },
     });
   };
 
   console.log("JS code is included!");
 
   function renderObject(data, object) {
-    const rows = Object.keys(object).map(key => {
+    const rows = Object.keys(object).map((key) => {
       const value = object[key];
       const id = makeId();
       return `
@@ -36,7 +36,7 @@
     </table>`;
   }
 
-  window.addEventListener("message", event => {
+  window.addEventListener("message", (event) => {
     console.log("Message arrived");
 
     const message = event.data;
@@ -45,12 +45,22 @@
       case "UPDATE":
         const { serializedGraph, states } = message.data;
 
-        const g = new dagreD3.graphlib.json.read(JSON.parse(serializedGraph));
+        const enhanceWithCurvedEgdes = (graph) => {
+          (graph.edges || []).forEach((edge) => {
+            edge.value = {
+              ...edge.value,
+              curve: d3.curveBasis,
+            };
+          });
+          return graph;
+        };
+
+        const g = new dagreD3.graphlib.json.read(enhanceWithCurvedEgdes(JSON.parse(serializedGraph)));
 
         const svg = d3.select("svg"),
           inner = svg.select("g");
         // Set up zoom support
-        const zoom = d3.zoom().on("zoom", function() {
+        const zoom = d3.zoom().on("zoom", function () {
           inner.attr("transform", d3.event.transform);
         });
         svg.call(zoom).on("dblclick.zoom", null);
@@ -58,7 +68,7 @@
         const render = new dagreD3.render();
         // Run the renderer. This is what draws the final graph.
         try {
-          g.graph().transition = function(selection) {
+          g.graph().transition = function (selection) {
             return selection.transition().duration(500);
           };
 
@@ -75,9 +85,10 @@
 
           render(inner, g);
 
-          inner.selectAll("g.node")
+          inner
+            .selectAll("g.node")
             .style("cursor", "pointer")
-            .on("click", function(data) {
+            .on("click", function (data) {
               if (isTooltipOpened) {
                 tooltip.style("visibility", "hidden");
 
