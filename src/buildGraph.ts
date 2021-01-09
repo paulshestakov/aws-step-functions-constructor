@@ -1,21 +1,29 @@
-import * as dagreD3 from "dagre-d3";
+import { graphlib } from "dagre-d3";
 import { v4 as uuidv4 } from "uuid";
 import * as R from "ramda";
 
 import { StepFunction, Operator, stringifyChoiceOperator } from "./stepFunction";
 
-const graphlib = dagreD3.graphlib;
-
 function makeGroupName() {
   return `Group_${uuidv4()}`;
 }
 
-export function buildGraph(stepFunction: StepFunction) {
-  var g = new graphlib.Graph({ compound: true }).setGraph({}).setDefaultEdgeLabel(function () {
-    return {};
-  });
+const attachStartNode = (g: graphlib.Graph, stateName: string) => {
+  const magicStartNodeName = `Start_${uuidv4()}`;
+  g.setNode(magicStartNodeName, { label: "Start", shape: "circle", style: "fill: #fcba03;" });
+  g.setEdge(magicStartNodeName, stateName);
+};
 
-  function traverse(stepFunction: StepFunction, g: dagreD3.graphlib.Graph, groupName?: string) {
+const attachEndNode = (g: graphlib.Graph, stateName: string) => {
+  const magicEndNodeName = `End_${uuidv4()}`;
+  g.setNode(magicEndNodeName, { label: "End", shape: "circle", style: "fill: #fcba03;" });
+  g.setEdge(stateName, magicEndNodeName);
+};
+
+export function buildGraph(stepFunction: StepFunction) {
+  var g = new graphlib.Graph({ compound: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
+
+  function traverse(stepFunction: StepFunction, g: graphlib.Graph, groupName?: string) {
     const startAtName = stepFunction.StartAt;
 
     if (groupName) {
@@ -25,12 +33,13 @@ export function buildGraph(stepFunction: StepFunction) {
     let statesToAddToParent = new Set(Object.keys(stepFunction.States));
 
     R.toPairs(stepFunction.States).forEach(([stateName, state]) => {
+      g.setNode(stateName, { label: stateName });
+
       if (stateName === startAtName && !groupName) {
-        g.setNode(stateName, { label: stateName, style: "fill: #fcba03;" });
-      } else if (state.End && !groupName) {
-        g.setNode(stateName, { label: stateName, style: "fill: #fcba03;" });
-      } else {
-        g.setNode(stateName, { label: stateName });
+        attachStartNode(g, stateName);
+      }
+      if (state.End && !groupName) {
+        attachEndNode(g, stateName);
       }
 
       switch (state.Type) {

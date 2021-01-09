@@ -2,15 +2,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 
 export function renderTemplate(extensionPath: string) {
-  const scriptPathOnDisk = vscode.Uri.file(
-    path.join(extensionPath, "media", "main.js")
-  );
-  const scriptPathOnDisk2 = vscode.Uri.file(
-    path.join(extensionPath, "media", "d3min.js")
-  );
-  const scriptPathOnDisk3 = vscode.Uri.file(
-    path.join(extensionPath, "media", "dagre-d3.min.js")
-  );
+  const scriptPathOnDisk = vscode.Uri.file(path.join(extensionPath, "media", "main.js"));
+  const scriptPathOnDisk2 = vscode.Uri.file(path.join(extensionPath, "media", "d3min.js"));
+  const scriptPathOnDisk3 = vscode.Uri.file(path.join(extensionPath, "media", "dagre-d3.min.js"));
   const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
   const scriptUri2 = scriptPathOnDisk2.with({ scheme: "vscode-resource" });
   const scriptUri3 = scriptPathOnDisk3.with({ scheme: "vscode-resource" });
@@ -49,7 +43,7 @@ export function renderTemplate(extensionPath: string) {
                   font-size: 14px;
                 }
 
-                .node rect {
+                .node rect, .node circle {
                   stroke: #999;
                   fill: #fff;
                   stroke-width: 1.5px;
@@ -96,8 +90,7 @@ export function renderTemplate(extensionPath: string) {
 
 function getNonce() {
   let text = "";
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

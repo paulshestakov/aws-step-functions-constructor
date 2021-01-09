@@ -1,0 +1,92 @@
+{
+  "StartAt": "Generate dataset",
+  "States": {
+    "Generate dataset": {
+      "Resource": "arn:aws:lambda:us-west-2:123456789012:function:TrainAndBatchTransform-SeedingFunction-17RNSOTG97HPV",
+      "Type": "Task",
+      "Next": "Train model (XGBoost)"
+    },
+    "Train model (XGBoost)": {
+      "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+      "Parameters": {
+        "AlgorithmSpecification": {
+          "TrainingImage": "433757028032.dkr.ecr.us-west-2.amazonaws.com/xgboost:latest",
+          "TrainingInputMode": "File"
+        },
+        "OutputDataConfig": {
+          "S3OutputPath": "s3://trainandbatchtransform-s3bucket-1jn1le6gadwfz/models"
+        },
+        "StoppingCondition": {
+          "MaxRuntimeInSeconds": 86400
+        },
+        "ResourceConfig": {
+          "InstanceCount": 1,
+          "InstanceType": "ml.m4.xlarge",
+          "VolumeSizeInGB": 30
+        },
+        "RoleArn": "arn:aws:iam::123456789012:role/TrainAndBatchTransform-SageMakerAPIExecutionRole-Y9IX3DLF6EUO",
+        "InputDataConfig": [
+          {
+            "DataSource": {
+              "S3DataSource": {
+                "S3DataDistributionType": "ShardedByS3Key",
+                "S3DataType": "S3Prefix",
+                "S3Uri": "s3://trainandbatchtransform-s3bucket-1jn1le6gadwfz/csv/train.csv"
+              }
+            },
+            "ChannelName": "train",
+            "ContentType": "text/csv"
+          }
+        ],
+        "HyperParameters": {
+          "objective": "reg:logistic",
+          "eval_metric": "rmse",
+          "num_round": "5"
+        },
+        "TrainingJobName.$": "$$.Execution.Name"
+      },
+      "Type": "Task",
+      "Next": "Save Model"
+    },
+    "Save Model": {
+      "Parameters": {
+        "PrimaryContainer": {
+          "Image": "433757028032.dkr.ecr.us-west-2.amazonaws.com/xgboost:latest",
+          "Environment": {},
+          "ModelDataUrl.$": "$.ModelArtifacts.S3ModelArtifacts"
+        },
+        "ExecutionRoleArn": "arn:aws:iam::123456789012:role/TrainAndBatchTransform-SageMakerAPIExecutionRole-Y9IX3DLF6EUO",
+        "ModelName.$": "$.TrainingJobName"
+      },
+      "Resource": "arn:aws:states:::sagemaker:createModel",
+      "Type": "Task",
+      "Next": "Batch transform"
+    },
+    "Batch transform": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+      "Parameters": {
+        "ModelName.$": "$$.Execution.Name",
+        "TransformInput": {
+          "CompressionType": "None",
+          "ContentType": "text/csv",
+          "DataSource": {
+            "S3DataSource": {
+              "S3DataType": "S3Prefix",
+              "S3Uri": "s3://trainandbatchtransform-s3bucket-1jn1le6gadwfz/csv/test.csv"
+            }
+          }
+        },
+        "TransformOutput": {
+          "S3OutputPath": "s3://trainandbatchtransform-s3bucket-1jn1le6gadwfz/output"
+        },
+        "TransformResources": {
+          "InstanceCount": 1,
+          "InstanceType": "ml.m4.xlarge"
+        },
+        "TransformJobName.$": "$$.Execution.Name"
+      },
+      "End": true
+    }
+  }
+}
