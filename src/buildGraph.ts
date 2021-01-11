@@ -18,22 +18,25 @@ const attachEndNode = (g: graphlib.Graph, stateName: string) => {
   g.setEdge(stateName, magicEndNodeName);
 };
 
-const ensureUnspecifiedNodes = (g: graphlib.Graph) => {
+const createMissingNodes = (g: graphlib.Graph) => {
+  const style = "fill: #ff0000;";
+  const makeLabel = (edgePointer) => `${edgePointer} (Missing)`;
   g.edges().forEach((edge) => {
     if (!g.node(edge.v)) {
-      g.setNode(edge.v, { label: `${edge.v} (Missing)`, style: "fill: #ff0000;" });
+      g.setNode(edge.v, { label: makeLabel(edge.v), style });
     }
     if (!g.node(edge.w)) {
-      g.setNode(edge.w, { label: `${edge.w} (Missing)`, style: "fill: #ff0000;" });
+      g.setNode(edge.w, { label: makeLabel(edge.w), style });
     }
   });
 };
 
 const roundNodes = (g: graphlib.Graph) => {
   g.nodes().forEach(function (v) {
-    var node = g.node(v);
+    const node = g.node(v);
     if (node) {
-      node.rx = node.ry = 5;
+      node.rx = 5;
+      node.ry = 5;
     }
   });
 };
@@ -51,10 +54,11 @@ const getNodeOptions = (state) => {
 };
 
 export function buildGraph(stepFunction: StepFunction) {
-  var g = new graphlib.Graph({ compound: true, multigraph: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
+  const g = new graphlib.Graph({ compound: true, multigraph: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
 
-  function traverse(stepFunction: StepFunction, g: graphlib.Graph, groupName?: string) {
+  const traverse = (stepFunction: StepFunction, g: graphlib.Graph, groupName?: string) => {
     const startAtName = stepFunction.StartAt;
+    const isRootLevel = !groupName;
 
     if (groupName) {
       g.setParent(startAtName, groupName);
@@ -65,10 +69,10 @@ export function buildGraph(stepFunction: StepFunction) {
     R.toPairs(stepFunction.States).forEach(([stateName, state]) => {
       g.setNode(stateName, { label: stateName, ...getNodeOptions(state) });
 
-      if (stateName === startAtName && !groupName) {
+      if (stateName === startAtName && isRootLevel) {
         attachStartNode(g, stateName);
       }
-      if (state.End && !groupName) {
+      if (state.End && isRootLevel) {
         attachEndNode(g, stateName);
       }
 
@@ -102,20 +106,17 @@ export function buildGraph(stepFunction: StepFunction) {
               g.setParent(newGroupName, groupName);
             }
 
+            const edgeOptions = { labelStyle: "font-style: italic;" };
+
             state.Choices.forEach((choice: Operator) => {
-              g.setEdge(stateName, choice.Next, {
-                label: stringifyChoiceOperator(choice),
-                labelStyle: "font-style: italic;",
-              });
+              const label = stringifyChoiceOperator(choice);
+              g.setEdge(stateName, choice.Next, { label, ...edgeOptions });
               g.setParent(choice.Next, newGroupName);
               statesToAddToParent.delete(choice.Next);
             });
-
             if (state.Default) {
-              g.setEdge(stateName, state.Default, {
-                label: "Default",
-                labelStyle: "font-style: italic;",
-              });
+              const label = "Default";
+              g.setEdge(stateName, state.Default, { label, ...edgeOptions });
               g.setParent(state.Default, newGroupName);
               statesToAddToParent.delete(state.Default);
             }
@@ -149,24 +150,14 @@ export function buildGraph(stepFunction: StepFunction) {
 
       if (state.Catch) {
         state.Catch.forEach((catcher) => {
-          g.setEdge(stateName, catcher.Next, {
-            label: (catcher.ErrorEquals || []).join(" or "),
-            labelStyle: "font-style: italic;",
-          });
+          const label = (catcher.ErrorEquals || []).join(" or ");
+          g.setEdge(stateName, catcher.Next, { label, labelStyle: "font-style: italic;" });
         });
       }
       if (state.Retry) {
-        const edgeName = `Edge_${uuidv4()}`;
         const conditionsLength = (state.Retry || []).length;
-        g.setEdge(
-          stateName,
-          stateName,
-          {
-            label: `(${conditionsLength} condition${conditionsLength > 1 ? "s" : ""})`,
-            labelStyle: "font-style: italic;",
-          },
-          edgeName
-        );
+        const label = `(${conditionsLength} condition${conditionsLength > 1 ? "s" : ""})`;
+        g.setEdge(stateName, stateName, { label, labelStyle: "font-style: italic;" });
       }
     });
 
@@ -175,10 +166,10 @@ export function buildGraph(stepFunction: StepFunction) {
         g.setParent(stateName, groupName);
       });
     }
-  }
+  };
 
   traverse(stepFunction, g);
-  ensureUnspecifiedNodes(g);
+  createMissingNodes(g);
   roundNodes(g);
 
   return JSON.stringify(graphlib.json.write(g));
