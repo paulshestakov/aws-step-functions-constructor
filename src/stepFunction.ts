@@ -7,12 +7,19 @@ interface BaseState {
   Type: string;
   Next: string;
   Catch: any[];
+  Retry: any[];
   End: boolean;
 }
 
 interface TaskState extends BaseState {
   Type: "Task";
   Resource: string;
+}
+
+interface FailState extends BaseState {
+  Type: "Fail";
+  Cause?: string;
+  Error?: string;
 }
 
 interface MapState extends BaseState {
@@ -55,7 +62,7 @@ interface ParallelState extends BaseState {
   Branches: StepFunction[];
 }
 
-type State = TaskState | MapState | ChoiceState | ParallelState;
+type State = TaskState | FailState | MapState | ChoiceState | ParallelState;
 
 export function stringifyChoiceOperator(operator: Operator) {
   const isLeaf = (operator: Operator) => Boolean(operator.Variable);

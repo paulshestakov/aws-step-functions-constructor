@@ -21,10 +21,10 @@ const attachEndNode = (g: graphlib.Graph, stateName: string) => {
 const ensureUnspecifiedNodes = (g: graphlib.Graph) => {
   g.edges().forEach((edge) => {
     if (!g.node(edge.v)) {
-      g.setNode(edge.v, { label: edge.v, style: "fill: #ff0000;" });
+      g.setNode(edge.v, { label: `${edge.v} (Missing)`, style: "fill: #ff0000;" });
     }
     if (!g.node(edge.w)) {
-      g.setNode(edge.w, { label: edge.w, style: "fill: #ff0000;" });
+      g.setNode(edge.w, { label: `${edge.w} (Missing)`, style: "fill: #ff0000;" });
     }
   });
 };
@@ -39,9 +39,19 @@ const roundNodes = (g: graphlib.Graph) => {
 };
 
 const stroke = "#999";
+const redStroke = "#a80d35";
+
+const getNodeOptions = (state) => {
+  switch (state.Type) {
+    case "Fail":
+      return { style: `stroke: ${redStroke};` };
+    default:
+      return {};
+  }
+};
 
 export function buildGraph(stepFunction: StepFunction) {
-  var g = new graphlib.Graph({ compound: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
+  var g = new graphlib.Graph({ compound: true, multigraph: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
 
   function traverse(stepFunction: StepFunction, g: graphlib.Graph, groupName?: string) {
     const startAtName = stepFunction.StartAt;
@@ -53,7 +63,7 @@ export function buildGraph(stepFunction: StepFunction) {
     const statesToAddToParent = new Set(Object.keys(stepFunction.States));
 
     R.toPairs(stepFunction.States).forEach(([stateName, state]) => {
-      g.setNode(stateName, { label: stateName });
+      g.setNode(stateName, { label: stateName, ...getNodeOptions(state) });
 
       if (stateName === startAtName && !groupName) {
         attachStartNode(g, stateName);
@@ -135,6 +145,28 @@ export function buildGraph(stepFunction: StepFunction) {
             g.setEdge(stateName, state.Next);
           }
         }
+      }
+
+      if (state.Catch) {
+        state.Catch.forEach((catcher) => {
+          g.setEdge(stateName, catcher.Next, {
+            label: (catcher.ErrorEquals || []).join(" or "),
+            labelStyle: "font-style: italic;",
+          });
+        });
+      }
+      if (state.Retry) {
+        const edgeName = `Edge_${uuidv4()}`;
+        const conditionsLength = (state.Retry || []).length;
+        g.setEdge(
+          stateName,
+          stateName,
+          {
+            label: `(${conditionsLength} condition${conditionsLength > 1 ? "s" : ""})`,
+            labelStyle: "font-style: italic;",
+          },
+          edgeName
+        );
       }
     });
 

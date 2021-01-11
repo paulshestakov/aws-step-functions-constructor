@@ -27,7 +27,15 @@
             },
             "F": {
               "Type": "Task",
+              "Catch": [
+                {
+                  "Next": "Err"
+                }
+              ],
               "End": true
+            },
+            "Err": {
+              "Type": "Fail"
             }
           }
         },
@@ -35,8 +43,16 @@
           "StartAt": "C",
           "States": {
             "C": {
-              "Type": "Pass",
+              "Type": "Task",
+              "Catch": [
+                {
+                  "Next": "Error"
+                }
+              ],
               "End": true
+            },
+            "Error": {
+              "Type": "Fail"
             }
           }
         }

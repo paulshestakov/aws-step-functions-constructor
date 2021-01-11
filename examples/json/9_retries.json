@@ -1,0 +1,31 @@
+{
+  "StartAt": "X",
+  "States": {
+    "X": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:us-east-1:123456789012:task:X",
+      "Next": "Y",
+      "Retry": [
+        {
+          "ErrorEquals": ["ErrorA", "ErrorB"],
+          "IntervalSeconds": 1,
+          "BackoffRate": 2.0,
+          "MaxAttempts": 2
+        },
+        {
+          "ErrorEquals": ["ErrorG"],
+          "IntervalSeconds": 5
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "Z"
+        }
+      ]
+    },
+    "Z": {
+      "Type": "Fail"
+    }
+  }
+}

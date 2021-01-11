@@ -1,0 +1,22 @@
+{
+  "StartAt": "ParseTextractOutput",
+  "States": {
+    "OutputNotFound": {
+      "Type": "Fail",
+      "Error": "<useful stuff here, like $.error-info.Error or something>",
+      "Cause": "<useful stuff here, like $.error-info.Cause or something>"
+    },
+    "ParseTextractOutput": {
+      "Type": "Task",
+      "Resource": "functionARN",
+      "Catch": [
+        {
+          "ErrorEquals": ["OutputNotFoundException"],
+          "ResultPath": "$.error-info",
+          "Next": "OutputNotFound"
+        }
+      ],
+      "End": true
+    }
+  }
+}
