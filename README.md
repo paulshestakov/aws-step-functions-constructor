@@ -20,7 +20,7 @@ Go into Command Palette and type:
 
 ## Opened in split view
 
-![Usage Example](https://github.com/PaulShestakov/pics/blob/master/splitView.png?raw=true)
+![Usage Example](https://github.com/PaulShestakov/pics/blob/master/sf2.png?raw=true)
 
 ## Live reload
 
