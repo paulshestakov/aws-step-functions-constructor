@@ -1,14 +1,8 @@
 {
   "Comment": "A simple example of the Steps language using an AWS Lambda Function",
-  "StartAt": "Hello",
+  "StartAt": "Parallel",
 
   "States": {
-    "Hello": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:eu-west-1:99999999999:function:HelloWord_Step",
-      "Next": "Parallel"
-    },
-
     "Parallel": {
       "Type": "Parallel",
       "Next": "Goodbye",
@@ -24,7 +18,28 @@
             "Calculate Radius": {
               "Type": "Task",
               "Resource": "arn:aws:lambda:eu-west-1:9999999999:function:HelloWord_Step",
+              "Retry": [
+                {
+                  "ErrorEquals": ["ErrorA", "ErrorB"],
+                  "IntervalSeconds": 1,
+                  "BackoffRate": 2.0,
+                  "MaxAttempts": 2
+                },
+                {
+                  "ErrorEquals": ["ErrorG"],
+                  "IntervalSeconds": 5
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.All"],
+                  "Next": "Radius error"
+                }
+              ],
               "Next": "Calculate Area"
+            },
+            "Radius error": {
+              "Type": "Fail"
             },
             "Calculate Area": {
               "Type": "Task",
