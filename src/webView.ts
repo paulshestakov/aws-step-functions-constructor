@@ -18,14 +18,20 @@ export const createWebviewPanel = (context: vscode.ExtensionContext) => {
   return panel;
 };
 
-export function renderTemplate(extensionPath: string) {
-  const scriptPathOnDisk = vscode.Uri.file(path.join(extensionPath, "media", "main.js"));
-  const scriptPathOnDisk2 = vscode.Uri.file(path.join(extensionPath, "media", "d3min.js"));
-  const scriptPathOnDisk3 = vscode.Uri.file(path.join(extensionPath, "media", "dagre-d3.min.js"));
-  const scriptUri = scriptPathOnDisk.with({ scheme: "vscode-resource" });
-  const scriptUri2 = scriptPathOnDisk2.with({ scheme: "vscode-resource" });
-  const scriptUri3 = scriptPathOnDisk3.with({ scheme: "vscode-resource" });
+export const renderTemplate = (extensionPath: string) => {
   const nonce = getNonce();
+  const fileNames2 = [
+    "lodash.min.js",
+    "d3.min.js",
+    "graphlib.core.min.js",
+    "dagre.core.min.js",
+    "dagre-d3.core.min.js",
+    "main.js",
+  ];
+
+  const uris = fileNames2.map((fileName) => {
+    return vscode.Uri.file(path.join(extensionPath, "media", fileName)).with({ scheme: "vscode-resource" });
+  });
 
   return `<!DOCTYPE html>
         <html lang="en">
@@ -98,12 +104,14 @@ export function renderTemplate(extensionPath: string) {
             <div class="svgWrapper">
               <svg width="100%" height="100%"><g/></svg>
             </div>
-            <script nonce="${nonce}" src="${scriptUri2}"></script>
-            <script nonce="${nonce}" src="${scriptUri3}"></script>
-            <script nonce="${nonce}" src="${scriptUri}"></script>
+            ${uris
+              .map((uri) => {
+                return `<script nonce="${nonce}" src="${uri}"></script>`;
+              })
+              .join("")}
         </body>
     </html>`;
-}
+};
 
 function getNonce() {
   let text = "";
