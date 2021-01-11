@@ -10,7 +10,7 @@
 - Stringifined declaration from cloudformation file
 - Serverless declaration from serverless.yml file
 
-## Open
+## Open in split view
 
 Go into Command Palette and type:
 
@@ -18,21 +18,7 @@ Go into Command Palette and type:
 > Show step function
 ```
 
-## Opened in split view
-
 ![Usage Example](https://github.com/PaulShestakov/pics/blob/master/sf2.png?raw=true)
-
-## Live reload
-
-![Usage Example](https://github.com/PaulShestakov/pics/blob/master/live.gif?raw=true)
-
-## Hover over state
-
-![Usage Example](https://github.com/PaulShestakov/pics/blob/master/hover.png?raw=true)
-
-## View choice conditionals
-
-![Usage Example](https://github.com/PaulShestakov/pics/blob/master/choice.png?raw=true)
 
 ## License
 
