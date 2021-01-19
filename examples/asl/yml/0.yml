@@ -1,0 +1,5 @@
+StartAt: Single State
+States:
+  Single State:
+    Type: Pass
+    End: true

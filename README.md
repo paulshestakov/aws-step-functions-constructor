@@ -6,9 +6,10 @@
 
 ## Supported formats:
 
-- JSON or YML declaration
-- Stringifined declaration from cloudformation file
-- Serverless declaration from serverless.yml file
+- ASL definition in JSON or YAML
+- SAM ASL definition or ASL file reference
+- Cloudformation definitionString
+- Serverless declaration
 
 ## Open in split view
 

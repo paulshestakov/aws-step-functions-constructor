@@ -5,7 +5,7 @@ import * as yaml from "js-yaml";
 
 import { resolveFrameworkSpecifics } from "./resolveFrameworkSpecifics";
 
-const getOpenedFileText = async (uri: vscode.Uri) => {
+const getText = async (uri: vscode.Uri) => {
   const document = await vscode.workspace.openTextDocument(uri);
   return document.getText();
 };
@@ -18,7 +18,7 @@ const getFileName = () => {
 export const getStepFunctionViewName = () => `stepFunction-${getFileName()}`;
 
 export const getSourceMap = async (uri: vscode.Uri) => {
-  const text = await getOpenedFileText(uri);
+  const text = await getText(uri);
   return jsonMap.parse(text);
 };
 
@@ -38,13 +38,37 @@ const getFileFormat = (uri: vscode.Uri): FileFormat => {
   }
 };
 
-export const parseText = (fileFormat: FileFormat, text: string): any => {
+export const parseText = (text: string, ext: string): any => {
+  const stripAWSTags = (text: string) => {
+    const intrinsicFunctions = [
+      "Base64",
+      "Cidr",
+      "Condition functions",
+      "FindInMap",
+      "GetAtt",
+      "GetAZs",
+      "ImportValue",
+      "Join",
+      "Select",
+      "Split",
+      "Sub",
+      "Transform",
+      "Ref",
+    ];
+    const regexps = intrinsicFunctions.map((func) => new RegExp(`!${func} `, "g"));
+
+    return regexps.reduce((acc, regexp) => acc.replace(regexp, ""), text);
+  };
   try {
-    switch (fileFormat) {
-      case FileFormat.JSON:
+    switch (ext) {
+      case ".json":
         return JSON.parse(text);
-      case FileFormat.YML:
-        return yaml.safeLoad(text);
+      case ".yaml":
+        return yaml.safeLoad(stripAWSTags(text));
+      case ".yml":
+        return yaml.safeLoad(stripAWSTags(text));
+      default:
+        throw new Error(`File extension ${ext} is not supported`);
     }
   } catch (error) {
     throw new Error(`Error occured while parsing file: ${error}`);
@@ -52,8 +76,8 @@ export const parseText = (fileFormat: FileFormat, text: string): any => {
 };
 
 export const parse = async (uri: vscode.Uri, fileName: string) => {
-  const openedFileFormat = getFileFormat(uri);
-  const openedFileText = await getOpenedFileText(uri);
-  const parsedData = parseText(openedFileFormat, openedFileText);
+  const ext = path.extname(uri.fsPath);
+  const text = await getText(uri);
+  const parsedData = parseText(text, ext);
   return resolveFrameworkSpecifics(parsedData, fileName);
 };

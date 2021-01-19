@@ -1,0 +1,5 @@
+service: hello-world
+
+stepFunctions:
+  stateMachines:
+    HelloWorldName: ${file(statemachine/statemachine.yml):HelloWorldName}

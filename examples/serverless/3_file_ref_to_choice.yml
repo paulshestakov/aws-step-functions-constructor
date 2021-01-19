@@ -1,5 +1,0 @@
-service: hello-world
-
-stepFunctions:
-  stateMachines:
-    HelloWorldName: ${file(3_file_ref_to_choice/3_ref.yml):HelloWorldName}

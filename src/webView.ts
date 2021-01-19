@@ -18,6 +18,15 @@ export const createWebviewPanel = (context: vscode.ExtensionContext) => {
   return panel;
 };
 
+const getNonce = () => {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
+
 export const renderTemplate = (extensionPath: string) => {
   const nonce = getNonce();
   const fileNames2 = [
@@ -112,15 +121,6 @@ export const renderTemplate = (extensionPath: string) => {
         </body>
     </html>`;
 };
-
-function getNonce() {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
 
 export function renderError(error: any) {
   return `

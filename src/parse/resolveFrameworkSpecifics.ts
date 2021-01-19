@@ -1,60 +1,71 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as R from "ramda";
 
-import { FileFormat, parseText } from "./parse";
+import { parseText } from "./parse";
 import { StepFunction } from "../stepFunction";
 
-function isStateFunctionDefinition(document: any): boolean {
-  return document.StartAt && document.States;
+function isASL(document: any) {
+  return Boolean(document.StartAt && document.States);
 }
 
-function isCloudformation(document: any) {
-  return !!document.AWSTemplateFormatVersion;
+function isSAM(document: any) {
+  return Boolean(document.AWSTemplateFormatVersion && document.Resources);
 }
 
-function isServerless(document: any) {
-  return document.stepFunctions && document.stepFunctions.stateMachines;
+function isSLS(document: any) {
+  return Boolean(document.stepFunctions && document.stepFunctions.stateMachines);
 }
 
 function isServerlessSeparateDeclaration(document: any) {
-  // Serverless separate function declaration
   const flowName = Object.keys(document)[0];
-  return (
-    flowName &&
-    document[flowName] &&
-    document[flowName].definition &&
-    isStateFunctionDefinition(document[flowName].definition)
-  );
+  return flowName && document[flowName] && document[flowName].definition && isASL(document[flowName].definition);
 }
 
 export const resolveFrameworkSpecifics = (document: any, fileName): StepFunction => {
-  if (isStateFunctionDefinition(document)) {
+  if (isASL(document)) {
     return {
       StartAt: document.StartAt,
-      States: document.States
+      States: document.States,
     };
   }
 
-  if (isCloudformation(document)) {
-    const sfResourceName = Object.keys(document.Resources).find(
-      resourceName => {
-        return (
-          document.Resources[resourceName].Type ===
-          "AWS::StepFunctions::StateMachine"
-        );
-      }
-    );
-    const sf = JSON.parse(
-      document.Resources[sfResourceName].Properties.DefinitionString
-    );
-    return sf;
+  if (isSAM(document)) {
+    const STATE_MACHINE_TYPE = "AWS::StepFunctions::StateMachine";
+    const SAM_STATE_MACHINE_TYPE = "AWS::Serverless::StateMachine";
+
+    console.log(document.Resources);
+
+    const stepFunctionResource = R.values(document.Resources).find((resource) => {
+      return resource.Type === STATE_MACHINE_TYPE || resource.Type === SAM_STATE_MACHINE_TYPE;
+    });
+
+    if (!stepFunctionResource) {
+      return null;
+    }
+    const properties = stepFunctionResource.Properties;
+
+    console.log(properties.Definition);
+
+    if (properties.DefinitionString) {
+      return JSON.parse(properties.DefinitionString);
+    } else if (properties.Definition) {
+      return properties.Definition;
+    } else if (properties.DefinitionUri) {
+      const absoluteFilePath = path.join(fileName, "..", properties.DefinitionUri);
+
+      const ext = path.extname(absoluteFilePath);
+      const text = fs.readFileSync(absoluteFilePath, "utf-8");
+
+      return parseText(text, ext);
+    } else {
+      return null;
+    }
   }
 
   // Serverless file - take just first
-  if (isServerless(document)) {
-    const stateMachinesNames = Object.keys(
-      document.stepFunctions.stateMachines
-    );
+  if (isSLS(document)) {
+    const stateMachinesNames = Object.keys(document.stepFunctions.stateMachines);
     const firstName = stateMachinesNames[0];
 
     const stateMachineValue = document.stepFunctions.stateMachines[firstName];
@@ -62,14 +73,13 @@ export const resolveFrameworkSpecifics = (document: any, fileName): StepFunction
     const isFileReference = typeof stateMachineValue === "string";
 
     if (isFileReference) {
-      const [, filePath, stateMachineName] = stateMachineValue.match(
-        /\$\{file\((.*)\):(.*)\}/
-      );
+      const [, filePath, stateMachineName] = stateMachineValue.match(/\$\{file\((.*)\):(.*)\}/);
       const absoluteFilePath = path.join(fileName, "..", filePath);
 
-      const fileText = fs.readFileSync(absoluteFilePath, "utf-8");
+      const ext = path.extname(absoluteFilePath);
+      const text = fs.readFileSync(absoluteFilePath, "utf-8");
 
-      const stateMachines = parseText(FileFormat.YML, fileText);
+      const stateMachines = parseText(text, ext);
 
       return stateMachines[stateMachineName].definition;
     } else {
@@ -83,4 +93,4 @@ export const resolveFrameworkSpecifics = (document: any, fileName): StepFunction
   }
 
   throw new Error("Could not extract function definition");
-}
+};
