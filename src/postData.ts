@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as _ from "lodash";
 
 import { parse, getSourceMap } from "./parse/parse";
-import { buildGraph } from "./buildGraph";
+import { buildGraph } from "./graph";
 import { getStates } from "./stepFunction";
 
 export const postData = async (panel: vscode.WebviewPanel, uri: vscode.Uri, fileName: string) => {

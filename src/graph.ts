@@ -2,19 +2,19 @@ import { graphlib } from "dagre-d3";
 import { v4 as uuidv4 } from "uuid";
 import * as R from "ramda";
 import { StepFunction, State, Operator, stringifyChoiceOperator } from "./stepFunction";
+import { getNodeOptions, getClusterOptions, getEdgeOptions, getMissingStyle } from "./graphStyles";
 
 const makeGroupName = () => `Group_${uuidv4()}`;
 const makeNodeName = () => `Node_${uuidv4()}`;
 
 const createMissingNodes = (g: graphlib.Graph) => {
-  const style = "fill: #ff0000;";
   const makeLabel = (edgePointer) => `${edgePointer} (Missing)`;
   g.edges().forEach((edge) => {
     if (!g.node(edge.v)) {
-      g.setNode(edge.v, { label: makeLabel(edge.v), style });
+      g.setNode(edge.v, { label: makeLabel(edge.v), style: getMissingStyle() });
     }
     if (!g.node(edge.w)) {
-      g.setNode(edge.w, { label: makeLabel(edge.w), style });
+      g.setNode(edge.w, { label: makeLabel(edge.w), style: getMissingStyle() });
     }
   });
   return g;
@@ -31,21 +31,6 @@ const roundNodes = (g: graphlib.Graph) => {
   return g;
 };
 
-const stroke = "#999";
-const red = "#a80d35";
-const green = "#2BD62E";
-
-const getNodeOptions = (state) => {
-  switch (state.Type) {
-    case "Fail":
-      return { style: `stroke: ${red};` };
-    case "Succeed":
-      return { style: `stroke: ${green};` };
-    default:
-      return {};
-  }
-};
-
 const isTerminalState = (state: State) => {
   return (
     (state.End && state.Type !== "Parallel" && state.Type !== "Map") ||
@@ -56,6 +41,15 @@ const isTerminalState = (state: State) => {
 
 const serializeGraph = R.compose(JSON.stringify, graphlib.json.write);
 
+const makeCluster = (g: graphlib.Graph, state: State, parentClusterName: string) => {
+  const clusterName = makeGroupName();
+  g.setNode(clusterName, getClusterOptions(state));
+  if (parentClusterName) {
+    g.setParent(clusterName, parentClusterName);
+  }
+  return clusterName;
+};
+
 export const buildGraph = (stepFunction: StepFunction) => {
   const g = new graphlib.Graph({ compound: true, multigraph: true }).setGraph({}).setDefaultEdgeLabel(() => ({}));
 
@@ -65,12 +59,22 @@ export const buildGraph = (stepFunction: StepFunction) => {
   g.setNode(startNodeName, { label: "Start", shape: "circle", style: "fill: #fcba03;" });
   g.setNode(endNodeName, { label: "End", shape: "circle", style: "fill: #fcba03;" });
 
-  const traverse = (stepFunction: StepFunction, g: graphlib.Graph, groupName?: string) => {
+  const traverse = (
+    stepFunction: StepFunction,
+    g: graphlib.Graph,
+    parentClusterName?: string,
+    fromState?: string,
+    nextState?: string
+  ) => {
     const startAtName = stepFunction.StartAt;
-    const isRootLevel = !groupName;
+    const isRootLevel = !parentClusterName;
 
-    if (groupName) {
-      g.setParent(startAtName, groupName);
+    if (fromState) {
+      g.setEdge(fromState, startAtName);
+    }
+
+    if (parentClusterName) {
+      g.setParent(startAtName, parentClusterName);
     }
 
     const statesToAddToParent = new Set(Object.keys(stepFunction.States));
@@ -84,77 +88,39 @@ export const buildGraph = (stepFunction: StepFunction) => {
 
       switch (state.Type) {
         case "Parallel": {
-          const newGroupName = makeGroupName();
-          g.setNode(newGroupName, {
-            label: "Parallel",
-            style: `stroke: ${stroke}; stroke-width: 2px; stroke-dasharray: 8, 4; rx: 5;`,
-            clusterLabelPos: "top",
-          });
-          if (groupName) {
-            g.setParent(newGroupName, groupName);
-          }
-
+          const clusterName = makeCluster(g, state, parentClusterName);
           state.Branches.forEach((branch) => {
-            g.setEdge(stateName, branch.StartAt);
-            traverse(branch, g, newGroupName);
-
-            R.toPairs(branch.States)
-              .filter(([branchStateName, branchState]) => isTerminalState(branchState))
-              .forEach(([branchStateName, branchState]) => g.setEdge(branchStateName, state.Next || endNodeName));
+            traverse(branch, g, clusterName, stateName, state.Next);
           });
           break;
         }
         case "Map": {
-          const newGroupName = makeGroupName();
-          g.setNode(newGroupName, {
-            label: "Map",
-            style: `stroke: ${stroke}; stroke-width: 2px; stroke-dasharray: 16, 4; rx: 5;`,
-            clusterLabelPos: "top",
-          });
-          if (groupName) {
-            g.setParent(newGroupName, groupName);
-          }
-          const branch = state.Iterator;
-          g.setEdge(stateName, branch.StartAt);
-          traverse(branch, g, newGroupName);
-          R.toPairs(branch.States)
-            .filter(([branchStateName, branchState]) => isTerminalState(branchState))
-            .forEach(([branchStateName, branchState]) => g.setEdge(branchStateName, state.Next || endNodeName));
+          const clusterName = makeCluster(g, state, parentClusterName);
+          traverse(state.Iterator, g, clusterName, stateName, state.Next);
           break;
         }
         case "Choice": {
           if (state.Choices) {
-            const newGroupName = makeGroupName();
-            g.setNode(newGroupName, {
-              label: "Choice",
-              style: "fill: #d9dddc; rx: 5;",
-              clusterLabelPos: "top",
-            });
-
-            if (groupName) {
-              g.setParent(newGroupName, groupName);
-            }
-
-            const edgeOptions = { labelStyle: "font-style: italic;" };
+            const clusterName = makeCluster(g, state, parentClusterName);
 
             state.Choices.forEach((choice: Operator) => {
               const label = stringifyChoiceOperator(choice);
-              g.setEdge(stateName, choice.Next, { label, ...edgeOptions });
-              g.setParent(choice.Next, newGroupName);
+              g.setEdge(stateName, choice.Next, { label, ...getEdgeOptions() });
+              g.setParent(choice.Next, clusterName);
               statesToAddToParent.delete(choice.Next);
             });
             if (state.Default) {
               const label = "Default";
-              g.setEdge(stateName, state.Default, { label, ...edgeOptions });
-              g.setParent(state.Default, newGroupName);
+              g.setEdge(stateName, state.Default, { label, ...getEdgeOptions() });
+              g.setParent(state.Default, clusterName);
               statesToAddToParent.delete(state.Default);
             }
           }
           break;
         }
         default: {
-          if (isTerminalState(state) && isRootLevel) {
-            g.setEdge(stateName, endNodeName);
+          if (isTerminalState(state)) {
+            g.setEdge(stateName, nextState || endNodeName);
           }
           if (state.Next) {
             g.setEdge(stateName, state.Next);
@@ -165,19 +131,19 @@ export const buildGraph = (stepFunction: StepFunction) => {
       if (state.Catch) {
         state.Catch.forEach((catcher) => {
           const label = (catcher.ErrorEquals || []).join(" or ");
-          g.setEdge(stateName, catcher.Next, { label, labelStyle: "font-style: italic;" });
+          g.setEdge(stateName, catcher.Next, { label, ...getEdgeOptions() });
         });
       }
       if (state.Retry) {
         const conditionsLength = (state.Retry || []).length;
         const label = `(${conditionsLength} condition${conditionsLength > 1 ? "s" : ""})`;
-        g.setEdge(stateName, stateName, { label, labelStyle: "font-style: italic;" });
+        g.setEdge(stateName, stateName, { label, ...getEdgeOptions() });
       }
     });
 
-    if (groupName) {
+    if (parentClusterName) {
       [...statesToAddToParent].forEach((stateName) => {
-        g.setParent(stateName, groupName);
+        g.setParent(stateName, parentClusterName);
       });
     }
 
