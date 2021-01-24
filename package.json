@@ -3,7 +3,7 @@
   "displayName": "AWS step functions constructor",
   "description": "Visualization of AWS step functions",
   "icon": "images/newPic.png",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "publisher": "paulshestakov",
   "repository": {
     "type": "git",
