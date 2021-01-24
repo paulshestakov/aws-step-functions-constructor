@@ -1,0 +1,13 @@
+{
+  "Comment": "A Hello World example of the Amazon States Language using a Pass state",
+  "StartAt": "Start",
+  "States": {
+    "Start": {
+      "Type": "Pass",
+      "Next": "Succeed"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    }
+  }
+}
