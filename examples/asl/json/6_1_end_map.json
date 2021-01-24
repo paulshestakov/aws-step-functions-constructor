@@ -1,0 +1,50 @@
+{
+  "StartAt": "Map",
+  "States": {
+    "Map": {
+      "Type": "Map",
+      "End": true,
+      "ItemsPath": "$.Ids",
+      "Iterator": {
+        "StartAt": "SyncItem",
+        "States": {
+          "SyncItem": {
+            "Retry": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "IntervalSeconds": 1,
+                "BackoffRate": 2,
+                "MaxAttempts": 3
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "LogError"
+              }
+            ],
+            "End": true,
+            "OutputPath": "$.Payload",
+            "Parameters": {
+              "FunctionName.$": "$.FunctionName",
+              "Payload": {
+                "ItemId.$": "$.ItemId"
+              }
+            },
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Type": "Task"
+          },
+          "LogError": {
+            "Type": "Pass",
+            "End": true
+          }
+        }
+      },
+      "MaxConcurrency": 20,
+      "Parameters": {
+        "FunctionName.$": "$.FunctionName",
+        "ItemId.$": "$$.Map.Item.Value"
+      }
+    }
+  }
+}

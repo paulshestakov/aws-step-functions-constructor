@@ -1,0 +1,76 @@
+{
+  "StartAt": "Map",
+  "States": {
+    "Map": {
+      "Type": "Map",
+      "End": true,
+      "ItemsPath": "$.Ids",
+      "Iterator": {
+        "StartAt": "SyncItem",
+        "States": {
+          "SyncItem": {
+            "Retry": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "IntervalSeconds": 1,
+                "BackoffRate": 2,
+                "MaxAttempts": 3
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "LogError"
+              }
+            ],
+            "End": true,
+            "OutputPath": "$.Payload",
+            "Parameters": {
+              "FunctionName.$": "$.FunctionName",
+              "Payload": {
+                "ItemId.$": "$.ItemId"
+              }
+            },
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Type": "Task"
+          },
+          "LogError": {
+            "Type": "Pass",
+            "Next": "LookupCustomerInfo"
+          },
+          "LookupCustomerInfo": {
+            "Type": "Parallel",
+            "End": true,
+            "Branches": [
+              {
+                "StartAt": "LookupAddress",
+                "States": {
+                  "LookupAddress": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:lambda:us-east-1:123456789012:function:AddressFinder",
+                    "End": true
+                  }
+                }
+              },
+              {
+                "StartAt": "LookupPhone",
+                "States": {
+                  "LookupPhone": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:lambda:us-east-1:123456789012:function:PhoneFinder",
+                    "End": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "MaxConcurrency": 20,
+      "Parameters": {
+        "FunctionName.$": "$.FunctionName",
+        "ItemId.$": "$$.Map.Item.Value"
+      }
+    }
+  }
+}
