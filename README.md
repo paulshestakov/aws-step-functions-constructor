@@ -32,3 +32,9 @@ Feedback and contributions welcome. Please leave a [review](https://marketplace.
 ## Info
 
 - [ASL](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-amazon-states-language.html) - Amazon states language definition
+
+## Alternatives
+
+[AWS Toolkit for Visual Studio Code](https://github.com/aws/aws-toolkit-vscode)
+
+The AWS Toolkit for Visual Studio Code supports defining, visualizing, and publishing your Step Functions workflows for local and remote state machines using code snippets, code completion, and code validation. Features such as automatic linting and code snippets allow for fast creation and deployment of state machines without leaving VS Code.
