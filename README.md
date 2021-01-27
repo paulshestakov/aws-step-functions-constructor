@@ -38,3 +38,5 @@ Feedback and contributions welcome. Please leave a [review](https://marketplace.
 [AWS Toolkit for Visual Studio Code](https://github.com/aws/aws-toolkit-vscode)
 
 The AWS Toolkit for Visual Studio Code supports defining, visualizing, and publishing your Step Functions workflows for local and remote state machines using code snippets, code completion, and code validation. Features such as automatic linting and code snippets allow for fast creation and deployment of state machines without leaving VS Code.
+
+Those features are documented [here](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/bulding-stepfunctions.html).
