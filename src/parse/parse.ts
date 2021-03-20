@@ -64,9 +64,9 @@ export const parseText = (text: string, ext: string): any => {
       case ".json":
         return JSON.parse(text);
       case ".yaml":
-        return yaml.safeLoad(stripAWSTags(text));
+        return yaml.load(stripAWSTags(text));
       case ".yml":
-        return yaml.safeLoad(stripAWSTags(text));
+        return yaml.load(stripAWSTags(text));
       default:
         throw new Error(`File extension ${ext} is not supported`);
     }
