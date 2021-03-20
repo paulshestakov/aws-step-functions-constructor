@@ -42,4 +42,4 @@ export const getClusterOptions = (state: State) => {
 
 export const getEdgeOptions = () => ({ labelStyle: "font-style: italic;" });
 
-export const getMissingStyle = () => "fill: #ff0000;"
+export const getMissingStyle = () => "fill: #ff0000;";
