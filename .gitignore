@@ -1,5 +1,13 @@
+# dependencies
+node_modules
+
+# build
 out
 dist
-node_modules
+
+# vscode
 .vscode-test/
 *.vsix
+
+# macos
+.DS_Store
