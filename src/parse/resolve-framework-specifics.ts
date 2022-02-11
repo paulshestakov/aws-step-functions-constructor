@@ -1,9 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as R from "ramda";
-
 import { parseText } from "./parse";
-import { StepFunction } from "../stepFunction";
+import { StepFunction } from "../step-function";
 
 function isASL(document: any) {
   return Boolean(document.StartAt && document.States);

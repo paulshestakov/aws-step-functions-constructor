@@ -1,4 +1,4 @@
-import { State } from "./stepFunction";
+import { State } from "./step-function";
 
 const stroke = "#999";
 const red = "#a80d35";

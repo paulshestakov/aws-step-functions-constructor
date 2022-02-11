@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import * as _ from "lodash";
-
 import { parse, getSourceMap } from "./parse/parse";
 import { buildGraph } from "./graph";
-import { getStates } from "./stepFunction";
+import { getStates } from "./step-function";
 
 export const postData = async (panel: vscode.WebviewPanel, uri: vscode.Uri, fileName: string) => {
   const stepFunction = await parse(uri, fileName);

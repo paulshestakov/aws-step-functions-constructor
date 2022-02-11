@@ -141,7 +141,6 @@ function oneLevelDeepClone(object) {
   }, {});
 }
 
-// FIXME: What the hell is that?
 function traverseStepFunction(stepFunction: StepFunction, callback: (stateName: string, step: State) => void) {
   Object.keys(stepFunction.States).forEach((stateName) => {
     const state = stepFunction.States[stateName];

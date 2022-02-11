@@ -2,8 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as jsonMap from "json-source-map";
 import * as yaml from "js-yaml";
-
-import { resolveFrameworkSpecifics } from "./resolveFrameworkSpecifics";
+import { resolveFrameworkSpecifics } from "./resolve-framework-specifics";
 
 const getText = async (uri: vscode.Uri) => {
   const document = await vscode.workspace.openTextDocument(uri);
@@ -20,22 +19,6 @@ export const getStepFunctionViewName = () => `stepFunction-${getFileName()}`;
 export const getSourceMap = async (uri: vscode.Uri) => {
   const text = await getText(uri);
   return jsonMap.parse(text);
-};
-
-export enum FileFormat {
-  JSON,
-  YML,
-}
-
-const getFileFormat = (uri: vscode.Uri): FileFormat => {
-  switch (path.extname(uri.fsPath)) {
-    case ".json":
-      return FileFormat.JSON;
-    case ".yml":
-      return FileFormat.YML;
-    default:
-      throw new Error("Unknown file format");
-  }
 };
 
 export const parseText = (text: string, ext: string): any => {

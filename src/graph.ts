@@ -1,8 +1,8 @@
 import { graphlib } from "dagre-d3";
 import { v4 as uuidv4 } from "uuid";
 import * as R from "ramda";
-import { StepFunction, State, Operator, stringifyChoiceOperator } from "./stepFunction";
-import { getNodeOptions, getClusterOptions, getEdgeOptions, getMissingStyle } from "./graphStyles";
+import { StepFunction, State, Operator, stringifyChoiceOperator } from "./step-function";
+import { getNodeOptions, getClusterOptions, getEdgeOptions, getMissingStyle } from "./graph-styles";
 
 const makeGroupName = () => `Group_${uuidv4()}`;
 const makeNodeName = () => `Node_${uuidv4()}`;

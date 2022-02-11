@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-
-import { postData, throttledPostData, makeHandleReceiveMessage } from "./postData";
-import { createWebviewPanel, renderTemplate } from "./webView";
+import { postData, throttledPostData, makeHandleReceiveMessage } from "./post-data";
+import { createWebviewPanel } from "./web-view";
 
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand("extension.showStepFunction", async () => {

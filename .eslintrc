@@ -1,0 +1,21 @@
+{
+  "env": {
+    "es2020": true,
+    "node": true,
+    "jest": true
+  },
+  "settings": {
+    "node": {
+      "tryExtensions": [".ts", ".json"]
+    }
+  },
+  "plugins": ["@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended-module",
+    "plugin:jest/recommended",
+    "prettier",
+    "plugin:@typescript-eslint/recommended"
+  ]
+}

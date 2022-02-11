@@ -1,11 +1,6 @@
-//@ts-check
-
-"use strict";
-
 const path = require("path");
 
-/**@type {import('webpack').Configuration}*/
-const config = {
+module.exports = {
   target: "node",
   entry: "./src/extension.ts",
   output: {
@@ -35,4 +30,3 @@ const config = {
     ],
   },
 };
-module.exports = config;
