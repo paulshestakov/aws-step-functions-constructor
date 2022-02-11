@@ -2,7 +2,7 @@
   "name": "aws-step-functions-constructor",
   "displayName": "AWS step functions constructor",
   "description": "Visualization of AWS step functions",
-  "icon": "images/newPic.png",
+  "icon": "images/icon.png",
   "version": "0.8.1",
   "publisher": "paulshestakov",
   "repository": {
